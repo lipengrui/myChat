@@ -37,14 +37,16 @@ class HomeController extends Controller {
     if (!!username && !!password) {
         const userData = await this.ctx.service.ccap.is_enableLogin(username, password);
         if(!!userData) {
+          const nowTime = new Date().getTime();
+          await this.app.mysql.query('UPDATE user SET logintime = ' + nowTime +' WHERE CID = ' + userData.cid);
           this.ctx.session.c_id = userData['cid'];
+          this.ctx.session.logintime = nowTime;
           this.ctx.session.data = userData;
           this.ctx.body = {code: 0, message: '登录成功', username: username }
           if(is_record){
-              console.log('isisisis_record')
             this.ctx.session.maxAge = 10 * 24 * 60 * 60 * 1000
           }else {
-            console.log('1232')
+            // 登录失效时长
             this.ctx.session.maxAge = 1 * 10 * 1000;
           }
           return;

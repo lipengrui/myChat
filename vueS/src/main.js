@@ -17,8 +17,8 @@ Vue.config.productionTip = false
 Vue.use(ElementUI);
 axios.defaults.withCredentials =  true;
 Vue.prototype.http = axios;
-Vue.use(VueSocketio, 'http://192.168.1.17:7001/user');
-Vue.prototype.baseUrl = 'http://192.168.1.17:7001';
+Vue.use(VueSocketio, 'http://192.168.1.4:7001/user');
+Vue.prototype.baseUrl = 'http://192.168.1.4:7001';
 // Vue.http.defaults.headers.post['Content-Type'] = 'application/json';
 /* eslint-disable no-new */
 new Vue({

@@ -21,7 +21,7 @@ module.exports = appInfo => {
     // methodnoallow:{
     //   enable: true
     // },
-    domainWhiteList: [ 'http://localhost:8080', 'http://localhost:80', 'http://192.168.1.17:8080' ]
+    domainWhiteList: [ 'http://localhost:8080', 'http://localhost:80', 'http://192.168.1.4:8080' ]
   };
   config.cors = {
     // origin: '*',
@@ -39,7 +39,7 @@ module.exports = appInfo => {
       host: 'localhost',
       port: '3306',
       user: 'root',
-      password: '',
+      password: '123',
       database: 'mytest',
     },
     app: true,
