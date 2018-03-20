@@ -1,0 +1,358 @@
+/* 所有依赖的全局样式都写在这里,全局样式只能是指定一个人维护, 禁止其他人维护 */
+
+html,
+body,
+button,
+p,
+span,
+applet,
+object,
+iframe,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+blockquote,
+pre,
+a,
+abbr,
+acronym,
+address,
+big,
+cite,
+code,
+del,
+dfn,
+em,
+font,
+img,
+ins,
+kbd,
+q,
+s,
+samp,
+small,
+strike,
+strong,
+sub,
+sup,
+tt,
+var,
+b,
+u,
+i,
+center,
+dl,
+dt,
+dd,
+ol,
+ul,
+li,
+fieldset,
+form,
+label,
+legend,
+table,
+caption,
+tbody,
+tfoot,
+thead,
+tr,
+th,
+td,
+p {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    outline: 0;
+    font-size: 100%;
+    vertical-align: baseline;
+    background: transparent;
+}
+
+i{
+font-style: normal;
+}
+
+ul,
+ol {
+    list-style: none;
+}
+
+* {
+    outline: none;
+}
+
+div {
+    border: none
+}
+
+a:hover,
+a:visited,
+a:link,
+a:active {
+    text-decoration: none;
+}
+
+html,
+body,
+.appArea {
+    height: 100%;
+    width: 100%;
+}
+
+
+/* 注意其中的fontsize大小, 是为了采用rem为单位的比例换算, 相当于1rem=16px,
+* 为了兼容pad等移动大屏设备,
+* @media screen and (min-width:769px){
+*   html{font-size: 200%}
+* }
+*/
+
+html,
+body {
+    font-size: 16px;
+}
+
+/*滚动条*/
+::-webkit-scrollbar {
+    width: 0.25rem;
+}
+::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 0, 0, 0.1);
+    border-radius: 1.25rem;
+}
+::-webkit-scrollbar-track {
+    opacity: 0;
+}
+
+/* 一个系统字体很重要, 这里设置的是苹果系统下用平方字体, pc下用微软雅黑, 其他为后补字体  */
+body,
+input,
+select,
+checkbox,
+radio, textarea, keygen, button {
+    -webkit-overflow-scrolling: touch;
+    font-family: "Microsoft YaHei", "微软雅黑", Helvetica, Arial, Verdana, sans-serif;
+    color: #333;
+}
+.mt10{
+    margin-top: .625rem;
+}
+.ml10{
+    margin-left: .625rem;
+}
+.mt20{
+    margin-top: 1.25rem;
+}
+.tip_nav{
+    height: 2rem;
+    display: flex;
+    align-items: center;
+}
+
+.el-date-editor.el-input,.el-input{
+    width: 12.5rem;
+}
+
+/*定位*/
+.ly_relative{
+    position: relative;
+}
+.ly_absolute{
+    position: absolute;
+}
+.ly_absoluteB0{
+    bottom:0;
+}
+.ly_absoluteLRTB0{
+    left:0;
+    right:0;
+    top:0;
+    bottom:0;
+}
+.ly_absoluteLR0{
+    left:0;
+    right:0;
+}
+.ly_absoluteLT0{
+    left:0;
+    top:0;
+}
+.warper{
+    min-height: 100%;
+}
+
+.warper_list{
+    display: flex;
+    justify-content: space-between;
+}
+.warper_list span{
+    font-size: .875rem;
+    color: #666;
+}
+.warper_list span em{
+    font-style: initial;
+    color: #409eff;
+}
+.list-content{
+    padding-bottom: 1.6rem;
+}
+/* 布局部分 */
+.ly_left{
+  float:left;
+}
+.ly_border_box{
+  box-sizing: border-box;
+}
+.ly_right{
+  float:right;
+}
+/*定位*/
+.ly_relative{
+  position: relative;
+}
+.ly_absolute{
+  position: absolute;
+}
+.ly_absoluteB0{
+  bottom:0;
+}
+.ly_absoluteLRTB0{
+  left:0;
+  right:0;
+  top:0;
+  bottom:0;
+}
+.ly_absoluteLR0{
+  left:0;
+  right:0;
+}
+.ly_absoluteLT0{
+  left:0;
+  top:0;
+}
+.ly_width100{
+  width:100%;
+}
+.ly_width200{
+  width:12.5rem;
+}
+.ly_width90{
+  width:90%;
+}
+.ly_clear::after{
+  content:'';
+  display: block;
+  clear: both;
+}
+.ly_flex {
+  display: flex/* 该容器使用 flex布局 */
+}
+.ly_block{
+  display: block;
+}
+.ly_inline_block{
+  display:inline-block;
+}
+.ly_height40{
+  height:2.5rem;
+}
+.ly_height25{
+  height:1.5625rem;
+}
+.ly_heightAuto{
+  height: 1.5rem;
+}
+.ly_none{
+  display: none;
+}
+.ly_flex_row {
+  flex-direction: row/* 该容器中的内容采用纵向排列 */
+}
+.ly_flex_wrap_wrap{
+  flex-wrap: wrap;
+}
+.ly_line_height0{
+  line-height: 0;
+}
+.ly_flex_wrap_nowrap{
+  flex-wrap: nowrap;
+}
+
+
+.ly_flex_col {
+  flex-direction: column/* 该容器中的内容采用横向排列 */
+}
+
+
+/* 100%填充 */
+
+.ly_flex_1 {
+  flex: 1
+}
+
+
+/* 内容居中 */
+
+.ly_flex_ali_center {
+  align-items: center
+}
+.ly_flex_ali_start{
+  align-items: flex-start;
+}
+.ly_flex_ali_end{
+  align-items: flex-end;
+}
+.ly_text_left {
+  text-align: left;
+}
+.ly_text_right {
+  text-align: right;
+}
+.ly_text_center {
+  text-align: center;
+}
+.ly_text_left {
+  text-align: left;
+}
+.ly_text_right {
+  text-align: right;
+}
+.ly_margin_auto{
+  margin:auto;
+}
+
+/* 容器左对齐 */
+
+.ly_flex_just_start {
+  justify-content: flex-start;
+}
+/*容器俩端对齐*/
+.ly_flex_just_between{
+  justify-content: space-between;
+}
+/*容器平均分布*/
+.ly_flex_just_around{
+  justify-content: space-around;
+}
+/* 容器居中对齐 */
+
+.ly_flex_just_center {
+  justify-content: center
+}
+
+
+/* 容器右边对齐 */
+
+.ly_flex_just_end {
+  justify-content: flex-end
+}
+
+.pointer{
+  cursor: pointer;
+}
+
