@@ -10,10 +10,10 @@
 
 module.exports = () => {
   return async (ctx, next) => {
-    console.log(123)
+    // console.log(123)
     // const userData = await ctx.service.user.say();
     const userData = await ctx.session;
-    ctx.socket.emit('res', 'session' + userData);
+    ctx.socket.emit('loginStatus', 'session' + JSON.stringify(userData));
     await next();
   };
 };

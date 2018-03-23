@@ -30,11 +30,11 @@
     "node": ">=8.9.0"
   },
   "scripts": {
-    "start": "egg-scripts start --daemon --ignore-stderr --title=egg-server-eggB",
+    "start": "egg-scripts start --daemon --sticky --ignore-stderr --title=egg-server-eggB",
     "stop": "egg-scripts stop --title=egg-server-eggB",
     "start1": "eggctl start --daemon",
     "stop1": "eggctl stop",
-    "dev": "egg-bin dev",
+    "dev": "egg-bin dev --cluster --sticky",
     "debug": "egg-bin debug",
     "test": "npm run lint -- --fix && npm run test-local",
     "test-local": "egg-bin test",

@@ -9,7 +9,8 @@ module.exports = appInfo => {
 
   // add your config here
   config.middleware = [
-    'saveSession'
+    'saveSession',
+    'verifyUser'
   ];
   config.security = {
     csrf: {
@@ -21,7 +22,7 @@ module.exports = appInfo => {
     // methodnoallow:{
     //   enable: true
     // },
-    domainWhiteList: [ 'http://localhost:8080', 'http://localhost:80', 'http://192.168.1.4:8080' ]
+    domainWhiteList: [ 'http://localhost:8080', 'http://localhost:80', 'http://192.168.1.17:8080' ]
   };
   config.cors = {
     // origin: '*',
@@ -39,7 +40,7 @@ module.exports = appInfo => {
       host: 'localhost',
       port: '3306',
       user: 'root',
-      password: '123',
+      password: '',
       database: 'mytest',
     },
     app: true,

@@ -29,7 +29,9 @@ class HomeController extends Controller {
     // await this.ctx.render('home.tpl', datalist);
   }
   async exit() {
-    this.ctx.session = null;
+    // this.ctx.redirect('/user');
+    this.ctx.socket.emit('loginStatus', '123231');
+       this.ctx.session = null;
     this.ctx.body = { code : 0, message: '成功退出'}
   }
   async login() {
@@ -38,8 +40,13 @@ class HomeController extends Controller {
         const userData = await this.ctx.service.ccap.is_enableLogin(username, password);
         if(!!userData) {
           const nowTime = new Date().getTime();
+          if( !!userData.logintime && nowTime > userData.logintime){
+            // console.log(this.app);
+            // console.log(this.ctxs);
+          };
           await this.app.mysql.query('UPDATE user SET logintime = ' + nowTime +' WHERE CID = ' + userData.cid);
           this.ctx.session.c_id = userData['cid'];
+
           this.ctx.session.logintime = nowTime;
           this.ctx.session.data = userData;
           this.ctx.body = {code: 0, message: '登录成功', username: username }

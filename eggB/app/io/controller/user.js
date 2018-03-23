@@ -6,7 +6,7 @@ class DefaultController extends Controller {
         const { ctx, app } = this;
         const message = '哎呀不懂啊';
         console.log('sdfsdff')
-        await ctx.socket.emit('res','hi 我是李鹏瑞' + message);
+        await ctx.socket.emit('loginStatus','hi 我是李鹏瑞' + message);
     }
 }
 module.exports = DefaultController;
