@@ -1,0 +1,43 @@
+.sec_bottom  .el-input input{
+    display: block;
+}
+.head{
+    height: 30px;
+  }
+.sec_con li{
+    line-height: 1em;
+    margin: 20px 0;
+  }
+  .sec_con .con{
+    height: 30px;
+    margin-left: 10px;
+  }
+  .sec_con .isMy .con{
+    margin-left:0;
+    margin-right: 10px;
+  }
+  .sec_con .context{
+    width: 70%;
+    text-align: left;
+    margin-left: 10px;
+    padding:0 10px;
+    line-height: 30px;
+    background-color: #fff;
+    border: 1px solid #eee;
+    border-radius: 6px;
+  }
+  .sec_con .isMy .context{
+    text-align: right;
+    margin-left:0;
+    margin-right: 10px;
+  }
+  .timer{
+    line-height: 1em;
+    display: inline-block;
+    font-size: 12px;
+    padding: .2em 1em;
+    border-radius: 3px;
+    margin-bottom: 2em;
+    background-color: rgba(100,100,100, .3);
+    color: #fff;
+  }

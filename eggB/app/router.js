@@ -14,6 +14,7 @@ module.exports = app => {
   router.post('/register', saveSession, controller.home.register);
   router.get('/exit', verifyUser, controller.home.exit);
   app.io.of('/user').route('user', app.io.controller.user.index);
+  app.io.of('/user').route('message', app.io.controller.user.message);
     // app.io.of('/chat')
     // app.io.of('/chat').route('chat', app.io.controller.chat.index);
 };

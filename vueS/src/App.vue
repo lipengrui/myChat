@@ -12,14 +12,14 @@ export default {
       console.log('socket connecte123d')
     },
     loginStatus: function (res) {
-      console.log(res)
+      console.log(res+'111')
     },
   },
   methods: {
     clickButton: function(val){
 //        console.log('dainji')
       // $socket is socket.io-client instance
-//      this.$socket.emit('user', 'eeeee');
+    //  this.$socket.emit('user', 'eeeee');
     }
   },
   created() {

@@ -1,7 +1,10 @@
 <template>
   <el-container>
-      <el-header>{{userData['username']}}
-        <el-button v-if="userData['username']!='请登录'" @click="exit()">退出</el-button>
+      <el-header>
+        {{userData['username']}}
+        <div class="right">
+<el-button  v-if="userData['username']!='请登录'" @click="exit()">退出</el-button>
+        </div>
 
       </el-header>
       <el-container>
@@ -23,6 +26,7 @@
   </el-container>
 </template>
 <script>
+require('../assets/css/base.css');
     export default {
         name: 'mainCon',
        data() {
@@ -32,8 +36,8 @@
         userData: {username:'请登录'},
         pathData: [
             {
-          path:'/employees',
-          name: '员工管理',
+          path:'/chat',
+          name: '聊聊天',
           icon: 'el-icon-star-on'
         },
         {

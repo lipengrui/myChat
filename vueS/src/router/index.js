@@ -23,12 +23,12 @@ export default new Router({
       children:[
         {
           path:'/',
-          name: 'employees',
+          name: 'chat',
           component: employees
         },
         {
-          path:'/employees',
-          name: 'employees',
+          path:'/chat',
+          name: 'chat',
           component: employees
         },
         {

@@ -8,6 +8,10 @@ class DefaultController extends Controller {
         console.log('sdfsdff')
         await ctx.socket.emit('loginStatus','hi 我是李鹏瑞' + message);
     }
+    async message() {
+        const { ctx, app } = this ;
+        await ctx.socket.broadcast.emit('message', ctx.args);
+    }
 }
 module.exports = DefaultController;
 

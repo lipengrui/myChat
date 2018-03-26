@@ -7,6 +7,7 @@ import ElementUI from 'element-ui'
 import VueSocketio from 'vue-socket.io';
 import axios from 'axios'
 import 'element-ui/lib/theme-chalk/index.css';
+import { util } from './assets/js/util.js';
 
 /**
  * 引入公用css
@@ -17,8 +18,9 @@ Vue.config.productionTip = false
 Vue.use(ElementUI);
 axios.defaults.withCredentials =  true;
 Vue.prototype.http = axios;
-Vue.use(VueSocketio, 'http://192.168.1.4:7001/user');
-Vue.prototype.baseUrl = 'http://192.168.1.4:7001';
+Vue.prototype.util = util;
+Vue.use(VueSocketio, 'http://192.168.1.17:7001/user');
+Vue.prototype.baseUrl = 'http://192.168.1.17:7001';
 // Vue.http.defaults.headers.post['Content-Type'] = 'application/json';
 /* eslint-disable no-new */
 new Vue({
