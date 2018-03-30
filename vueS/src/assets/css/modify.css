@@ -41,3 +41,39 @@
     background-color: rgba(100,100,100, .3);
     color: #fff;
   }
+
+
+    
+  .hover000{
+    background-color:rgba(0,0,0, 0);
+  }
+  .hover000:hover{
+    background-color:rgba(0,0,0, 0.03);
+  }
+  aside .fa_button{
+    padding: 5px 8px;
+  }
+
+  .jian{
+    top:0;bottom:0;left:0;right:0;
+    opacity: 0;
+    font-size: 1.5em;
+    color: #fff;
+    background-color: rgba(0,0,0,0);
+  }
+  .jianParent:hover .jian{
+    opacity: 1;
+    background-color: rgba(0,0,0,.3);
+
+  }
+  .na_more .el-dropdown{
+    display: block;
+  }
+  .na_groupSure{
+    padding-top: 10px;
+    left:0;right:0;
+    text-align: center;
+    line-height: 1em;
+    bottom:0;
+    background: linear-gradient(to bottom, rgba(0,0,0,0) 0%, #ddd 100%, rgba(0,0,0,0) 100%);
+  }

@@ -359,7 +359,9 @@ radio, textarea, keygen, button {
 .pointer{
   cursor: pointer;
 }
-
+.border_style_dashed{
+  border-style: dashed!important;
+}
 .left{
   float:left;
 }
@@ -381,6 +383,21 @@ radio, textarea, keygen, button {
 }
 .mT15{
   margin-top:15px;
+}
+.mB15{
+  margin-bottom: 15px;
+}
+.el-button.p10{
+  padding: 10px;
+}
+.el-button.lineH26{
+  line-height: 26px;
+}
+.lineH1em{
+  line-height: 1em;
+}
+.pB25{
+  padding-bottom: 25px;
 }
 .fill{
   display: block;

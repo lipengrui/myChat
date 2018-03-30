@@ -1,55 +1,40 @@
 <template>
   <div>
      <el-row>
-       <el-col :span="8" class="grid-content bg-purple-light pointer backgHover relative"><span class="fill backgHover000" @mouseenter="showFriendbox">聊天</span>  </el-col>
+       <el-col :span="8" class="grid-content bg-purple-light pointer backgHover relative na_more"><el-dropdown @command="creategroup"><span class="fill backgHover000 el-dropdown-link">更多</span> 
+       
+      <el-dropdown-menu slot="dropdown">
+        <el-dropdown-item command="group">群聊</el-dropdown-item>
+        <el-dropdown-item>期待更多</el-dropdown-item>
+      </el-dropdown-menu>
+    </el-dropdown>
+        </el-col>
        <el-col :span="8" class="grid-content bg-purple pointer backgHover relative"><span class="fill backgHover000" @mouseenter="showFriendbox">朋友</span> </el-col>
        <el-col :span="8" class="grid-content bg-purple-light pointer backgHover relative"><span class="fill backgHover000" @mouseenter="showFriendbox">我</span> </el-col>
      </el-row>
-     <div class="relative">
-<section class="chat relative ly_flex ly_flex_col">
+     <div class="relative chatparent">
+<section class="chat absolute ly_flex ly_flex_col" v-for="(sec, index) in sessionList" :key="index" :roomId="sec.roomId" v-if="sessionStatus[sec.roomId]">
+  <ul class="absolute na_sessionList header">
+          <li class="pointer hover000 relative" :class="{active:sessionStatus[sec.roomId] }" v-for="(sec, index) in sessionList" :key="index" v-if="sec.sessionUser.length > 0" @click="selectSession(sec.roomId)">
+              <img class="lineH1em" :src="sec.sessionUser[0].img?sec.sessionUser[0].img: '../../../static/images/logo.png'" alt="图片加载失败">
+              <span>{{sec.sessionUser[0].name}}</span>
+              <!-- <span class="Badge absolute">4</span> -->
+          </li>
+        </ul>
   <div class="header relative">
     <ul class="clear">
-      <li v-for="item in sessionUser" :key="item.name" class="left">
+      <li v-for="(item, userIndex) in sec.sessionUser" :key="item.name" class="left relative jianParent pointer">
           <img :src="!!item.img?item.img: '../../../static/images/logo.png'" alt="图片加载失败">
           <span>{{item.name}}</span>
+          <i class="jian iconfont icon-53 absolute" @click="removeuser(index, sec.roomId, userIndex)"></i>
       </li>
+      <li class="border_style_dashed na_add hover000 relative left pointer" v-if="sec.roomId != 0" @click="sessiongroup(sec.roomId ,index)"> <i class="iconfont icon-jia"></i> </li>
+        <el-button v-if="sec.roomId != 0" class="lineH26 right" type="danger">删除聊天</el-button>
     </ul>
-    <p class="absolute header_p" v-if="sessionUser.length == 1"> 正在输入...</p>
-    <p class="absolute header_p" v-if="sessionUser.length == 0"> 请选择对话人物</p>
+    <!-- <p class="absolute header_p" v-if="sessionUser.length == 1"> 正在输入...</p> -->
+    <p class="absolute header_p" v-if="sec.roomId == 0"> 请选择对话人物</p>
   </div>
   <ul class="ly_flex1 sec_con" ref="con_text">
-
-
-
-    <!-- <li v-for="(item, index) in dataList" :key="index">
-      <p class="timer">{{item.time}}</p>
-      <div class="con clear">
-      <img class="head left" src="../../../static/images/logo.png" alt="">
-      <p class="left context">{{item.text}}</p>
-      </div>
-    </li> -->
-    <!-- <li>
-      <div class="con clear">
-      <img class="head left" src="../../../static/images/logo.png" alt="">
-      <p class="left context">sdfasdf</p>
-      </div>
-    </li>
-    <li>
-      <p class="timer">2018-15-22</p>
-      <div class="con clear">
-      <img class="head left" src="../../../static/images/logo.png" alt="">
-      <p class="left context">sdfasdf</p>
-      </div>
-    </li> -->
-
-
-<!-- <li class="isMy">
-      <p class="timer">2018-15-22</p>
-      <div class="con clear">
-      <img class="head right" src="../../../static/images/logo.png" alt="">
-      <p class="right context">sdfasdf</p>
-      </div>
-    </li> -->
 
 
   </ul>
@@ -65,12 +50,25 @@
   </div>
     </section>
     <aside class="@slideR friendbox fn_friendbox" :style="friendbox" @mouseleave="hiddenFriendbox">
+        <div class="na_ulParent">
+
         <ul>
-          <li v-for="item in userList" :key="item.name" class="clear" @click="addSession(item)">
+          <li v-for="(item, listIndex) in userList" :key="item.c_id" class="clear pointer" @click="addSession(item)">
               <img :src="!!item.img?item.img: '../../../static/images/logo.png'" alt="图片加载失败" class="left">
               <span class="left">{{item.name}}</span>
+              <el-button type="primary" class="fa_button right" v-if="!inItValue.addgroup" @click="creatRoom(JSON.stringify(item))">发送消息</el-button>
+              <!-- <el-button type="danger" class="fa_button right" v-if="inItValue.addgroup && inItValue.groupName.indexOf(item.c_id) != -1" @click="creatRoom(JSON.stringify(item))">移除</el-button>
+              <el-button type="primary" class="fa_button right" v-if="inItValue.addgroup && inItValue.groupName.indexOf(item.c_id) == -1" @click="adduser(item)">加入</el-button> -->
+
+               <el-button type="primary" class="fa_button right" v-if="inItValue.addgroup && !item.selected" @click="addListUser(item.c_id, listIndex)">加入</el-button>
+              <el-button type="danger" class="fa_button right" v-if="inItValue.addgroup && item.selected" @click="removeListUser(item.c_id, listIndex)">移除</el-button>
           </li>
         </ul>
+        </div>
+        <div v-if="inItValue.creategroup" class="absolute pB25 na_groupSure">
+             <el-button type="primary" class="sure_button" @click="grouped">确定</el-button>
+            <el-button class="sure_button" @click="hiddenFriendbox">取消</el-button>
+          </div>
     </aside>
      </div>
     
@@ -86,18 +84,36 @@ export default {
         message: '',
         inItValue: {
           lateTime: new Date().getTime(),
-          awaitTime: 1 * 10 * 1000
+          awaitTime: 1 * 10 * 1000,
+          addgroup: false, // 是否加入群组
+          creategroup: false, // 是否新建群组
+          groupName: '',
+          roomIndex: 0,
+          temporaryGroup: vue.login_msg.c_id
         },
         userList: [
-          {cid: 1, name: '李1', img: '', status: true},
-          {cid: 2,name: '李2', img: '', status: true},
-          {cid: 3,name: '李3', img: '', status: true},
+          {c_id: 1, name: '李1', img: '', status: true, selected: false},
+          {c_id: 2,name: '李2', img: '', status: true, selected: false},
+          {c_id: 3,name: '李3', img: '', status: true, selected: false},
         ],
-        sessionUser:[
-          {cid: 1, name: '李1', img: '', status: true},
+        userOldList: [
+          {c_id: 1, name: '李1', img: '', status: true, selected: false},
+          {c_id: 2,name: '李2', img: '', status: true, selected: false},
+          {c_id: 3,name: '李3', img: '', status: true, selected: false},
+        ],
+        sessionStatus: {
+          0: true,
+        },
+        sessionList: [
+          {roomId:0 ,sessionUser:[]},
         ]
       }
   },
+  filters: {
+      json: function (value) {
+        return JSON.stringify(value);
+      }
+    },
    sockets:{
     message: function (res) {
       const nowTime = res[1];
@@ -108,34 +124,93 @@ export default {
         var creatLi = document.createElement('li');
         creatLi.innerHTML = ` ${timer}
       <div class="con clear">
-      <img class="head left" src="../../../static/images/logo.png" alt="">
+      <img class="head left lineH1em" src="../../../static/images/logo.png" alt="">
       <p class="left context">${res[0]}</p>
       </div>`;
       this.$refs.con_text.appendChild(creatLi);
       this.inItValue.lateTime = nowTime;
     },
   },
+  computed: {
+    comUserList: function () {
+      return this.userList;
+    }
+  },
   methods: {
+    creategroup(command){// 添加群组
+    switch (command) {
+      case 'group':
+      this.inItValue.creategroup = true;
+      this.inItValue.addgroup = true;
+      this.showFriendbox();
+      break;
+    }
+    },
+    grouped() { // 确定创建群组
+
+    },
+    sessiongroup(roomId, roomIndex) {  // 加入群组
+      this.showFriendbox();
+       this.inItValue.addgroup = true;
+      this.inItValue.groupName = String(roomId);
+      this.inItValue.roomIndex = roomIndex;
+    },
+    removeuser(roomIndex, roomId, userIndex) { // 移除人员
+console.log(roomIndex, roomId, userIndex)
+    },
+    adduser(item){ // 添加人员
+      this.sessionList[this.inItValue.roomIndex].sessionUser.push(item)
+    },
      handleOpen(key, keyPath) {
         console.log(key, keyPath);
       },
       handleClose(key, keyPath) {
         console.log(key, keyPath);
       },
+      selectSession(roomId) { // 根据roomid选择会话  没有roomid 的话会 新建并选中
+      for (let key in this.sessionStatus){
+          this.sessionStatus[key] = false;
+        }
+      this.sessionStatus[roomId] = true;
+      this.sessionStatus = Object.assign({}, this.sessionStatus)
+      },
+      addListUser(c_id, index){
+        this.$data.userList[index].selected = true;
+        this.$data.userList= Object.assign({}, this.userList);
+        this.inItValue.temporaryGroup += c_id;
+      },
+      removeListUser(c_id, index){
+        this.userList[index].selected = false;
+        this.inItValue.temporaryGroup.indexOf(c_id);
+        
+      },
       addSession(item){
-        let is_have = false;
-        let index = 0;
-        for (let i=0; i< this.sessionUser.length; i++){
-          if (this.sessionUser[i].cid == item.cid){
-            index = i;
-            is_have = true; break;
-          }
-        }
-        if(is_have){ // 已存在
-               this.sessionUser.splice(index,1);
-        }else{ // 不存在
-              this.sessionUser.push(item);
-        }
+        // let is_have = false;
+        // let index = 0;
+        // for (let i=0; i< this.sessionUser.length; i++){
+        //   if (this.sessionUser[i].cid == item.cid){
+        //     index = i;
+        //     is_have = true; break;
+        //   }
+        // }
+        // if(is_have){ // 已存在
+        //        this.sessionUser.splice(index,1);
+        // }else{ // 不存在
+        //       this.sessionUser.push(item);
+        // }
+      },
+      creatRoom(item){ // 创建新会话
+      const itemData = JSON.parse(item);
+      const roomId = vue.login_msg.c_id + '_' + itemData.c_id;
+      if(!this.sessionStatus.hasOwnProperty(roomId) ) { // 之前没有新建
+         this.sessionList.push({
+           roomId: roomId,
+          sessionUser: [
+            itemData
+          ]
+        });
+      }
+        this.selectSession(roomId)
       },
       send(){
         const nowTime = new Date().getTime();
@@ -148,7 +223,7 @@ export default {
         creatLi.className = 'isMy';
         creatLi.innerHTML = ` ${timer}
       <div class="con clear">
-      <img class="head right" src="../../../static/images/logo.png" alt="">
+      <img class="head right lineH1em" src="../../../static/images/logo.png" alt="">
       <p class="right context">${this.message}</p>
       </div>`;
       this.$refs.con_text.appendChild(creatLi);
@@ -162,10 +237,13 @@ export default {
         }, 100)
       },
       hiddenFriendbox(){
-        this.friendbox = { display: 'block'};
-        setTimeout( () => {
-          this.friendbox= {display: 'none'};
-        }, 300)
+        // this.inItValue.addgroup = false;
+        // this.inItValue.creatgroup = false;
+        // this.inItValue.groupName ='';
+        // this.friendbox = { display: 'block'};
+        // setTimeout( () => {
+        //   this.friendbox= {display: 'none'};
+        // }, 300)
       }
   }
 
@@ -178,11 +256,42 @@ export default {
 }
 </script>
 <style lang="css" scoped>
+.na_sessionList{
+  left:-73px;
+  top:0;bottom:0;
+  overflow-y: auto;
+}
+.chatparent{
+  height: 80vh;
+}
+.header .Badge{
+  background-color: red;
+  color: #fff;
+  padding:2px 4px;
+  display: block;
+  right: 5px;
+  top:2px;
+  font-size: 12px;
+  width: auto;
+  border-radius: 50%;
+}
+.na_sessionList .active{
+  background-color: #dbeb94;
+}
 .sec_bottom{
   height:40px;
 }
+.fa_button{
+  margin-top: 15px;
+  margin-right: 50px;
+  opacity: 0;
+}
+.sure_button{
 
-
+}
+.na_add i{
+  font-size: 2.5em;
+}
 .header_p{
   top:0;left:0;bottom: 0;right:0;
   line-height: 52px;
@@ -216,9 +325,19 @@ export default {
 .sec_bottom input{
   display: block;
 }
-.friendbox{
+.na_ulParent{
+  position: absolute;
+  padding-top: 30px;
+  padding-bottom: 60px;
+  top:0;
+  left:0;
+  bottom:0;
+  right:0;
   overflow-y: auto;
-  padding: 30px 0;
+}
+.friendbox{
+  /* overflow-y: auto; */
+
 }
 .friendbox li{
   height:50px;
@@ -232,6 +351,9 @@ export default {
 .friendbox li:hover{
   background-color: rgba(200,200,200,.6);
 }
+.friendbox li:hover .fa_button{
+  opacity: 1;
+}
 .friendbox img{
   width: 40px;
   height: 40px;
@@ -243,8 +365,10 @@ export default {
   .chat{
     width:600px;
     height:80vh;
+    left:0;right:0;
     margin: 0 auto;
     box-shadow: 0px 0px 2px 2px #ccc;
+      background-color: #E9EEF3;
   }
   .el-row {
     margin-bottom: 20px;
@@ -280,8 +404,6 @@ export default {
     bottom:0;
     opacity: 0;
     right: -10px;
-    /* opacity: 1;
-    right: 0px; */
     transition: opacity ease-in-out .5s, right ease-in-out .3s;
   }
 </style>

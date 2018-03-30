@@ -23,7 +23,7 @@ Vue.use(VueSocketio, 'http://192.168.1.17:7001/user');
 Vue.prototype.baseUrl = 'http://192.168.1.17:7001';
 // Vue.http.defaults.headers.post['Content-Type'] = 'application/json';
 /* eslint-disable no-new */
-new Vue({
+window.vue = new Vue({
   el: '#app',
   router,
   components: { App },

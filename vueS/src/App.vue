@@ -12,7 +12,11 @@ export default {
       console.log('socket connecte123d')
     },
     loginStatus: function (res) {
-      console.log(res+'111')
+      if (!!res) {
+        sessionStorage.removeItem('login_msg');
+        sessionStorage.setItem('login_msg', JSON.stringify(res));
+        vue['login_msg'] = JSON.parse(res);
+      }
     },
   },
   methods: {
