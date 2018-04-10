@@ -22,7 +22,7 @@ module.exports = appInfo => {
     // methodnoallow:{
     //   enable: true
     // },
-    domainWhiteList: [ 'http://localhost:8080', 'http://localhost:80', 'http://192.168.1.17:8080' ]
+    domainWhiteList: [ 'http://localhost:8080', 'http://localhost:80', 'http://192.168.1.96:8080' ]
   };
   config.cors = {
     // origin: '*',

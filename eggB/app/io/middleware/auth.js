@@ -13,7 +13,7 @@ module.exports = () => {
     // console.log(123)
     // const userData = await ctx.service.user.say();
     const userData = await ctx.session;
-    ctx.socket.emit('loginStatus', JSON.stringify(userData));
+    ctx.socket.emit('loginStatus', userData);
     await next();
   };
 };

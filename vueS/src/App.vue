@@ -15,7 +15,6 @@ export default {
       if (!!res) {
         sessionStorage.removeItem('login_msg');
         sessionStorage.setItem('login_msg', JSON.stringify(res));
-        vue['login_msg'] = JSON.parse(res);
       }
     },
   },

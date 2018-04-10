@@ -28,15 +28,14 @@
           <span>{{item.name}}</span>
           <i class="jian iconfont icon-53 absolute" @click="removeuser(index, sec.roomId, userIndex)"></i>
       </li>
-      <li class="border_style_dashed na_add hover000 relative left pointer" v-if="sec.roomId != 0" @click="sessiongroup(sec.roomId ,index)"> <i class="iconfont icon-jia"></i> </li>
+      <li class="border_style_dashed na_add hover000 relative left pointer" v-if="sec.roomId != 0" @click="addgroup(sec)"> <i class="iconfont icon-jia"></i> </li>
         <el-button v-if="sec.roomId != 0" class="lineH26 right" type="danger">删除聊天</el-button>
     </ul>
     <!-- <p class="absolute header_p" v-if="sessionUser.length == 1"> 正在输入...</p> -->
     <p class="absolute header_p" v-if="sec.roomId == 0"> 请选择对话人物</p>
   </div>
   <ul class="ly_flex1 sec_con" ref="con_text">
-
-
+{{sec|json}}
   </ul>
   <div class="sec_bottom ly_flex">
     <el-input
@@ -56,12 +55,12 @@
           <li v-for="(item, listIndex) in userList" :key="item.c_id" class="clear pointer" @click="addSession(item)">
               <img :src="!!item.img?item.img: '../../../static/images/logo.png'" alt="图片加载失败" class="left">
               <span class="left">{{item.name}}</span>
-              <el-button type="primary" class="fa_button right" v-if="!inItValue.addgroup" @click="creatRoom(JSON.stringify(item))">发送消息</el-button>
+              <el-button type="primary" class="fa_button right" v-if="!inItValue.addgroup && !inItValue.creategroup" @click="creatRoom(JSON.stringify(item))">发送消息</el-button>
               <!-- <el-button type="danger" class="fa_button right" v-if="inItValue.addgroup && inItValue.groupName.indexOf(item.c_id) != -1" @click="creatRoom(JSON.stringify(item))">移除</el-button>
               <el-button type="primary" class="fa_button right" v-if="inItValue.addgroup && inItValue.groupName.indexOf(item.c_id) == -1" @click="adduser(item)">加入</el-button> -->
 
-               <el-button type="primary" class="fa_button right" v-if="inItValue.addgroup && !item.selected" @click="addListUser(item.c_id, listIndex)">加入</el-button>
-              <el-button type="danger" class="fa_button right" v-if="inItValue.addgroup && item.selected" @click="removeListUser(item.c_id, listIndex)">移除</el-button>
+               <el-button type="primary" class="fa_button right" v-if="(inItValue.addgroup || inItValue.creategroup) && !item.selected" @click="addListUser(item, listIndex)">加入</el-button>
+              <el-button type="danger" class="fa_button right" v-if="(inItValue.addgroup || inItValue.creategroup) && item.selected" @click="removeListUser(item, listIndex)">移除</el-button>
           </li>
         </ul>
         </div>
@@ -87,9 +86,10 @@ export default {
           awaitTime: 1 * 10 * 1000,
           addgroup: false, // 是否加入群组
           creategroup: false, // 是否新建群组
-          groupName: '',
+          createRoomId: JSON.parse(sessionStorage.getItem('login_msg')).c_id,
+          createSessionUser: [],
+          currentRoomId: '0',
           roomIndex: 0,
-          temporaryGroup: vue.login_msg.c_id
         },
         userList: [
           {c_id: 1, name: '李1', img: '', status: true, selected: false},
@@ -141,22 +141,33 @@ export default {
     switch (command) {
       case 'group':
       this.inItValue.creategroup = true;
-      this.inItValue.addgroup = true;
+      this.inItValue.addgroup = false;
       this.showFriendbox();
       break;
     }
     },
     grouped() { // 确定创建群组
-
+    if(this.inItValue.createSessionUser.length <= 0) return;
+    let is_status = this.panhoveroomId(this.inItValue.createRoomId);
+    if(is_status.is_have){
+      this.selectSession(is_status.room);return;
+    }
+      this.sessionList.push({
+           roomId: this.inItValue.createRoomId,
+          sessionUser: this.inItValue.createSessionUser
+        });
+        this.selectSession(this.inItValue.createRoomId);
+        this.hiddenFriendbox();
     },
-    sessiongroup(roomId, roomIndex) {  // 加入群组
+    addgroup(currentgroup) {  // 加入群组
+      // this.userList.forEach(element => {
+      //   console.log(element)
+      // });
+      this.inItValue.addgroup = true;
       this.showFriendbox();
-       this.inItValue.addgroup = true;
-      this.inItValue.groupName = String(roomId);
-      this.inItValue.roomIndex = roomIndex;
     },
     removeuser(roomIndex, roomId, userIndex) { // 移除人员
-console.log(roomIndex, roomId, userIndex)
+
     },
     adduser(item){ // 添加人员
       this.sessionList[this.inItValue.roomIndex].sessionUser.push(item)
@@ -167,22 +178,56 @@ console.log(roomIndex, roomId, userIndex)
       handleClose(key, keyPath) {
         console.log(key, keyPath);
       },
+      panhoveroomId(roomId){ // 判断是否存在roomid
+      let is_status= {is_have: false, room: ''};
+        for (let key in this.sessionStatus){
+          if (this.util.equals(key.split('_'), roomId.split('_'))){is_status.is_have = true, is_status.room = key};
+        }
+        return is_status
+      },
       selectSession(roomId) { // 根据roomid选择会话  没有roomid 的话会 新建并选中
+      let is_status= {is_have: false, room: ''};
+
       for (let key in this.sessionStatus){
+          if (this.util.equals(key.split('_'), roomId.split('_'))){is_status.is_have = true, is_status.room = key};
           this.sessionStatus[key] = false;
         }
-      this.sessionStatus[roomId] = true;
+        if (is_status.is_have){
+          this.sessionStatus[is_status.room] = true;
+          this.inItValue.currentRoomId = is_status.room;
+        }else {
+          this.sessionStatus[roomId] = true;
+          this.inItValue.currentRoomId = roomId;
+        }
       this.sessionStatus = Object.assign({}, this.sessionStatus)
       },
-      addListUser(c_id, index){
-        this.$data.userList[index].selected = true;
-        this.$data.userList= Object.assign({}, this.userList);
-        this.inItValue.temporaryGroup += c_id;
+      addListUser(item, index){
+        this.userList[index].selected = true;
+        // this.$data.userList= Object.assign({}, this.userList);
+        if (this.inItValue.creategroup){ // 创建群组
+          this.inItValue.createRoomId += ('_' + item.c_id);
+          this.inItValue.createSessionUser.push(item);
+          return;
+        }
+        if (this.inItValue.addgroup){ // 添加群组
+            // console.log(this.inItValue.e)
+          return;
+        }
       },
-      removeListUser(c_id, index){
+      removeListUser(item, index){
         this.userList[index].selected = false;
-        this.inItValue.temporaryGroup.indexOf(c_id);
-        
+        if (this.inItValue.creategroup){ // 创建群组
+        const exp = new RegExp('_' + item.c_id,'g');
+        const createRoomId_arr =this.inItValue.createRoomId.split('_');
+        const index = (createRoomId_arr).indexOf(String(item.c_id));
+         this.inItValue.createRoomId = this.inItValue.createRoomId.replace(exp,'');
+         this.inItValue.createSessionUser.splice(index-1,1);
+          return;
+        }
+        if (this.inItValue.addgroup){ // 添加群组
+
+          return;
+        }
       },
       addSession(item){
         // let is_have = false;
@@ -199,10 +244,12 @@ console.log(roomIndex, roomId, userIndex)
         //       this.sessionUser.push(item);
         // }
       },
-      creatRoom(item){ // 创建新会话
+      creatRoom(item){ // 创建新房间
+      const login_msg = JSON.parse(sessionStorage.getItem('login_msg'));
       const itemData = JSON.parse(item);
-      const roomId = vue.login_msg.c_id + '_' + itemData.c_id;
-      if(!this.sessionStatus.hasOwnProperty(roomId) ) { // 之前没有新建
+      const roomId = JSON.parse(sessionStorage.getItem('login_msg')).c_id + '_' + itemData.c_id;
+      const is_status = this.panhoveroomId(roomId);
+      if(!is_status.is_have ) { // 之前没有新建
          this.sessionList.push({
            roomId: roomId,
           sessionUser: [
@@ -237,13 +284,15 @@ console.log(roomIndex, roomId, userIndex)
         }, 100)
       },
       hiddenFriendbox(){
-        // this.inItValue.addgroup = false;
-        // this.inItValue.creatgroup = false;
-        // this.inItValue.groupName ='';
-        // this.friendbox = { display: 'block'};
-        // setTimeout( () => {
-        //   this.friendbox= {display: 'none'};
-        // }, 300)
+        this.inItValue.addgroup = false;
+        this.inItValue.creategroup = false;
+        this.inItValue.createRoomId = JSON.parse(sessionStorage.getItem('login_msg')).c_id;
+        this.inItValue.createSessionUser = [];
+        this.friendbox = { display: 'block'};
+        this.userList = this.util.deepCopyArrayObj(this.userOldList);
+        setTimeout( () => {
+          this.friendbox= {display: 'none'};
+        }, 300)
       }
   }
 

@@ -19,5 +19,96 @@ export const util = {
           }
         }
         return fmt;
+      },
+    /**
+   * 深拷贝对象
+   */
+  deepCopyObj : function (obj) {
+    if (obj instanceof Array || typeof obj != 'object') {
+        return obj;
+    }
+    let newobj = {};
+    for (let attr in obj) {
+        newobj[attr] = this.deepCopyObj(obj[attr]);
+    }
+    return newobj;
+  },
+   /*
+  * 拷贝对象数组
+  * */
+  deepCopyArrayObj: function ( array ) {
+    let arr = [];
+    for ( let arrItem of array ) {
+      if ( arrItem instanceof Array) {
+        arr.push(this.deepCopyArrayObj(arrItem));
+        continue;
+      } else if (arrItem instanceof Object) {
+        let obj = {};
+        for ( const key in arrItem) {
+          obj[key] = arrItem[key];
+        }
+        arr.push(obj);
+        continue;
+      } else {
+        arr.push(arrItem);
+        continue;
       }
+    }
+    return arr;
+  },
+  equals : function(array1, array2){ // 比较俩个数组里的值是否相等
+    array1 = array1.sort();
+    array2 = array2.sort();
+    if (!array1 || !array2)
+           return false;
+  
+     // compare lengths - can save a lot of time 
+    if (array1.length != array2.length)
+         return false;
+
+   for (var i = 0, l = array1.length; i < l; i++) {
+       // Check if we have nested arrays
+        if (array1[i] instanceof Array && array2[i] instanceof Array) {
+            // recurse into the nested arrays
+            if (!this.equals(array1[i], array2[i]))
+               return false;       
+        } else if (array1[i] != array2[i]) { 
+             // Warning - two different object instances will never be equal: {x:20} != {x:20}
+            return false;   
+        }           
+    }       
+     return true;
+  },
+  /*
+   *
+   * 用后面对象去填充前面对象
+   * */
+  fullObj: function ( first, second, reserve) {
+    for ( const key in first ) {
+      if ( reserve.includes(key) ) {
+        continue;
+      } else {
+        first[key] = second[key] || '';
+      }
+    }
+  },
+
+  // 用后面的数组内的对象 覆盖前面数组里 对象 根据 特点值来区别数组内的顺序
+  fullArrayObj: function (arry1, arry2, key) {
+    for (let i = 0, l = arry1.length; i < l;  i++){
+      for(let j = 0, n = arry2.length; j < n;  j++){
+        if (arry1[i][key] == arry2[j][key] ){
+          arry1[i] = arry2[j];
+          return;
+        }
+        console.log('j', j)
+      }
+      console.log('i',i);
+    }
+    // arry1.forEach(element,index => {
+    //   arry2.forEach( item2,index => {
+        
+    //   })
+    // });
+  }
 };

@@ -8,7 +8,7 @@
 
       </el-header>
       <el-container>
-          <el-aside width="200px">
+          <el-aside width="0px">
 
 <el-menu :default-active="activeUrl" router class="el-menu-vertical-demo" @open="handleOpen" @close="handleClose" :collapse="isCollapse">
 
