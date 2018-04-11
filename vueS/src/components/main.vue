@@ -88,8 +88,9 @@ require('../assets/css/base.css');
         }else if(response.data.code == 1){
           this.$router.push({path: '/'})
         }
-
-//      console.log(response.data.csrf)
+// 
+//      this.util.fullArrayObj(aa,bb,'a');
+//      console.log(aa)
     });
 
     }

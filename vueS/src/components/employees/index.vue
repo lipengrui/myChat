@@ -64,7 +64,7 @@
           </li>
         </ul>
         </div>
-        <div v-if="inItValue.creategroup" class="absolute pB25 na_groupSure">
+        <div v-if="inItValue.creategroup || inItValue.addgroup" class="absolute pB25 na_groupSure">
              <el-button type="primary" class="sure_button" @click="grouped">确定</el-button>
             <el-button class="sure_button" @click="hiddenFriendbox">取消</el-button>
           </div>
@@ -88,7 +88,8 @@ export default {
           creategroup: false, // 是否新建群组
           createRoomId: JSON.parse(sessionStorage.getItem('login_msg')).c_id,
           createSessionUser: [],
-          currentRoomId: '0',
+          currentRoomId: '0', // 当前会话选择的roomid
+          currentIndex: 0, // 当前会话在整个会话中的下标
           roomIndex: 0,
         },
         userList: [
@@ -146,23 +147,29 @@ export default {
       break;
     }
     },
-    grouped() { // 确定创建群组
-    if(this.inItValue.createSessionUser.length <= 0) return;
-    let is_status = this.panhoveroomId(this.inItValue.createRoomId);
-    if(is_status.is_have){
-      this.selectSession(is_status.room);return;
-    }
-      this.sessionList.push({
-           roomId: this.inItValue.createRoomId,
-          sessionUser: this.inItValue.createSessionUser
-        });
+    grouped() { 
+    if (this.inItValue.creategroup){// 确定创建群组
+        if(this.inItValue.createSessionUser.length <= 0) return;
+        let is_status = this.panhoveroomId(this.inItValue.createRoomId);
+        if(is_status.is_have){
+          this.selectSession(is_status.room);return;
+        }
+          this.sessionList.push({
+              roomId: this.inItValue.createRoomId,
+              sessionUser: this.inItValue.createSessionUser
+            });
         this.selectSession(this.inItValue.createRoomId);
         this.hiddenFriendbox();
+    }else if (this.inItValue.addgroup){ // 确定对群组的修改
+        
+    }
+    
     },
     addgroup(currentgroup) {  // 加入群组
-      // this.userList.forEach(element => {
-      //   console.log(element)
-      // });
+      this.util.fullArrayObj(this.userList, currentgroup.sessionUser, 'c_id'); // 将当前会话的用户列表 付给所有用户的状态
+      this.inItValue.currentIndex = this.util.filterArrayObj(this.sessionList, {roomId: this.inItValue.currentRoomId}).index;
+      this.util.fullArrayObj(this.inItValue.createSessionUser, this.sessionList[this.inItValue.currentIndex].sessionUser) ;
+      this.inItValue.createRoomId = this.inItValue.currentRoomId;
       this.inItValue.addgroup = true;
       this.showFriendbox();
     },
@@ -204,30 +211,30 @@ export default {
       addListUser(item, index){
         this.userList[index].selected = true;
         // this.$data.userList= Object.assign({}, this.userList);
-        if (this.inItValue.creategroup){ // 创建群组
+        // if (this.inItValue.creategroup){ // 创建群组
           this.inItValue.createRoomId += ('_' + item.c_id);
           this.inItValue.createSessionUser.push(item);
-          return;
-        }
-        if (this.inItValue.addgroup){ // 添加群组
-            // console.log(this.inItValue.e)
-          return;
-        }
+          // return;
+        // }
+        // if (this.inItValue.addgroup){ // 添加群组
+        // this.inItValue.currentRoomId += ('_' + item.c_id);
+          // return;
+        // }
       },
       removeListUser(item, index){
         this.userList[index].selected = false;
-        if (this.inItValue.creategroup){ // 创建群组
+        // if (this.inItValue.creategroup){ // 创建群组
         const exp = new RegExp('_' + item.c_id,'g');
         const createRoomId_arr =this.inItValue.createRoomId.split('_');
-        const index = (createRoomId_arr).indexOf(String(item.c_id));
+        let indexa = (createRoomId_arr).indexOf(String(item.c_id));
          this.inItValue.createRoomId = this.inItValue.createRoomId.replace(exp,'');
-         this.inItValue.createSessionUser.splice(index-1,1);
-          return;
-        }
-        if (this.inItValue.addgroup){ // 添加群组
+         this.inItValue.createSessionUser.splice(indexa-1,1);
+          // return;
+        // }
+        // if (this.inItValue.addgroup){ // 添加群组
 
-          return;
-        }
+        //   return;
+        // }
       },
       addSession(item){
         // let is_have = false;
@@ -286,6 +293,7 @@ export default {
       hiddenFriendbox(){
         this.inItValue.addgroup = false;
         this.inItValue.creategroup = false;
+        this.inItValue.currentIndex = 0;
         this.inItValue.createRoomId = JSON.parse(sessionStorage.getItem('login_msg')).c_id;
         this.inItValue.createSessionUser = [];
         this.friendbox = { display: 'block'};

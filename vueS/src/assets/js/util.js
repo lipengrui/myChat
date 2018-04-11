@@ -82,6 +82,8 @@ export const util = {
   /*
    *
    * 用后面对象去填充前面对象
+   *  arg1 = {a: 1, b:'', } arg2 = {a:2, b:'bb', c:'cc'}
+   * fullObj(arg1, arg2, ['a'])  ==> arg1= {a:1,b:'bb'}
    * */
   fullObj: function ( first, second, reserve) {
     for ( const key in first ) {
@@ -94,21 +96,52 @@ export const util = {
   },
 
   // 用后面的数组内的对象 覆盖前面数组里 对象 根据 特点值来区别数组内的顺序
+  /**
+   * let aa = [{a:1,b:2,c:3},{a:4,b:5},{a:6,b: 8}];
+      let bb = [{a:7,b:'bb'},{a:1,b:'bb',c:'cc'},{a:4, b:'bb'}];
+      fullArrayObj(aa,bb,'a');  => [{a:1,b:'bb',c:'cc'},{a:4, b:'bb'},{a:6,b: 8}]
+   * 
+   */
   fullArrayObj: function (arry1, arry2, key) {
     for (let i = 0, l = arry1.length; i < l;  i++){
       for(let j = 0, n = arry2.length; j < n;  j++){
         if (arry1[i][key] == arry2[j][key] ){
           arry1[i] = arry2[j];
-          return;
         }
-        console.log('j', j)
       }
-      console.log('i',i);
     }
-    // arry1.forEach(element,index => {
-    //   arry2.forEach( item2,index => {
-        
-    //   })
+  },
+  //筛选出 具备某一特定值  里的数组对象里的某一个对象
+  filterArrayObj: function (target ,obj) {
+    let finisharr = [];
+    let index = [];
+    for (let i = 0, l = target.length; i< l; i++){
+      let is_true = false;
+      for (let key in obj){
+        if(target[i][key] == obj[key]){
+          is_true = true;
+        }else {
+          is_true = false;
+        }
+      }
+      if (is_true){
+        finisharr.push(target[i]);
+        index.push(i);
+      }
+    }
+    // target.forEach( ele => {
+    //   let is_true = false; // 是否满足obj里的条件
+      // for (let key in obj){
+      //   if(ele[key] == obj[key]){
+      //     is_true = true;
+      //   }else {
+      //     is_true = false;
+      //   }
+      // }
+      // if (is_true){
+      //   finisharr.push(ele);
+      // }
     // });
-  }
+    return {index: index, arr: finisharr};
+  },
 };
