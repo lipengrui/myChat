@@ -1,6 +1,7 @@
 // app.js
 // const LocalStrategy = require('passport-local').Strategy;
 module.exports = app => {
+  let login_name = '';
   // 挂载 strategy
   // app.passport.use(new LocalStrategy({
   //   passReqToCallback: true,

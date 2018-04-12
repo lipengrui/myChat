@@ -19,7 +19,8 @@ class HomeController extends Controller {
     // this.ctx.cookies.set('token', token);
     // console.log(ctx.cookies.get('c_user'))
     if(!!this.ctx.session.data) {
-      this.ctx.body = { code: 0, message: '登陆成功',  data: this.ctx.session.data }
+      // this.ctx.body = { code: 0, message: '登陆成功',  data: this.ctx.session.data }
+      this.ctx.body = { code: 0, message: '登陆成功' }
       return;
     }else {
       this.ctx.body = { code: 1, message: '未登录' }
@@ -50,12 +51,14 @@ class HomeController extends Controller {
           this.ctx.session.logintime = nowTime;
           this.ctx.session.data = userData;
           this.ctx.body = {code: 0, message: '登录成功', username: username }
-          if(is_record){
-            this.ctx.session.maxAge = 10 * 24 * 60 * 60 * 1000
-          }else {
-            // 登录失效时长
-            this.ctx.session.maxAge = 1 * 10 * 1000;
-          }
+          // if(is_record){
+          //   this.ctx.session.maxAge = 10 * 24 * 60 * 60 * 1000
+          // }else {
+          //   // 登录失效时长
+          //   this.ctx.session.maxAge = 1 * 10 * 1000;
+          // }
+          this.app.login_name = username;
+          this.ctx.cookies.set('login_name', username);
           return;
         }else {
           this.ctx.body = { code: 103 , message: '用户名或密码错误'}

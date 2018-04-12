@@ -159,7 +159,8 @@ export default {
             message: '登录成功',
             type: 'success'
           })
-          this.$router.push({path:'/main'})
+          sessionStorage.setItem('login')
+          // this.$router.push({path:'/main'})
         }else {
           this.$message({
             message: response.data.message,

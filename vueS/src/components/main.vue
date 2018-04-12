@@ -82,16 +82,13 @@ require('../assets/css/base.css');
       }
     },
     created() {
-      this.http.get( this.baseUrl + '/getuser').then(response => {
-        if(response.data.code ==0 && !!response.data.data){
-          this.userData = response.data.data;
-        }else if(response.data.code == 1){
-          this.$router.push({path: '/'})
-        }
-// 
-//      this.util.fullArrayObj(aa,bb,'a');
-//      console.log(aa)
-    });
+    //   this.http.get( this.baseUrl + '/getuser').then(response => {
+    //     if(response.data.code ==0 && !!response.data.data){
+    //       this.userData = response.data.data;
+    //     }else if(response.data.code == 1){
+    //       this.$router.push({path: '/'})
+    //     }
+    // });
 
     }
 }

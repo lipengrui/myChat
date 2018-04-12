@@ -26,16 +26,16 @@
       <li v-for="(item, userIndex) in sec.sessionUser" :key="item.name" class="left relative jianParent pointer">
           <img :src="!!item.img?item.img: '../../../static/images/logo.png'" alt="图片加载失败">
           <span>{{item.name}}</span>
-          <i class="jian iconfont icon-53 absolute" @click="removeuser(index, sec.roomId, userIndex)"></i>
+          <i class="jian iconfont icon-53 absolute" @click="removeuser(index, sec.roomId, userIndex, item)"></i>
       </li>
       <li class="border_style_dashed na_add hover000 relative left pointer" v-if="sec.roomId != 0" @click="addgroup(sec)"> <i class="iconfont icon-jia"></i> </li>
-        <el-button v-if="sec.roomId != 0" class="lineH26 right" type="danger">删除聊天</el-button>
+        <el-button v-if="sec.roomId != '_'" class="lineH26 right" type="danger" @click="removeSession(sec.roomId, index)">删除聊天</el-button>
     </ul>
     <!-- <p class="absolute header_p" v-if="sessionUser.length == 1"> 正在输入...</p> -->
-    <p class="absolute header_p" v-if="sec.roomId == 0"> 请选择对话人物</p>
+    <p class="absolute header_p" v-if="sec.roomId == '_'"> 请选择对话人物</p>
   </div>
   <ul class="ly_flex1 sec_con" ref="con_text">
-{{sec|json}}
+{{sessionList|json}}
   </ul>
   <div class="sec_bottom ly_flex">
     <el-input
@@ -103,10 +103,10 @@ export default {
           {c_id: 3,name: '李3', img: '', status: true, selected: false},
         ],
         sessionStatus: {
-          0: true,
+          '_': true,
         },
         sessionList: [
-          {roomId:0 ,sessionUser:[]},
+          {roomId:'_' ,sessionUser:[]},
         ]
       }
   },
@@ -148,6 +148,7 @@ export default {
     }
     },
     grouped() { 
+      console.log(this.sessionList)
     if (this.inItValue.creategroup){// 确定创建群组
         if(this.inItValue.createSessionUser.length <= 0) return;
         let is_status = this.panhoveroomId(this.inItValue.createRoomId);
@@ -161,20 +162,56 @@ export default {
         this.selectSession(this.inItValue.createRoomId);
         this.hiddenFriendbox();
     }else if (this.inItValue.addgroup){ // 确定对群组的修改
-        
+        // this.sessionList[this.inItValue.currentIndex].roomId = ;
+        // this.sessionList[this.inItValue.currentIndex].sessionUser = this.inItValue.createSessionUser;
+        // console.log(this.sessionList[this.inItValue.currentIndex].sessionUser)
+        this.sessionList.splice(this.inItValue.currentIndex,1,{roomId: this.inItValue.createRoomId, sessionUser: this.inItValue.createSessionUser});
+        delete this.sessionStatus[this.inItValue.currentRoomId];
+        this.selectSession(this.inItValue.createRoomId);
+        this.hiddenFriendbox();
     }
     
     },
     addgroup(currentgroup) {  // 加入群组
+    if (currentgroup.roomId == '_'){
+      this.showFriendbox();
+      return;
+    }
       this.util.fullArrayObj(this.userList, currentgroup.sessionUser, 'c_id'); // 将当前会话的用户列表 付给所有用户的状态
       this.inItValue.currentIndex = this.util.filterArrayObj(this.sessionList, {roomId: this.inItValue.currentRoomId}).index;
-      this.util.fullArrayObj(this.inItValue.createSessionUser, this.sessionList[this.inItValue.currentIndex].sessionUser) ;
+      this.inItValue.createSessionUser = this.util.deepCopyArrayObj(this.sessionList[this.inItValue.currentIndex].sessionUser) ;
+
       this.inItValue.createRoomId = this.inItValue.currentRoomId;
       this.inItValue.addgroup = true;
       this.showFriendbox();
     },
-    removeuser(roomIndex, roomId, userIndex) { // 移除人员
+    removeuser(roomIndex, roomId, userIndex, item, ) { // 移除人员
+    const len = this.sessionList[roomIndex].sessionUser.length;
+    console.log(this.sessionList[roomIndex])
+    if ( len == 2){
+      const resove = confirm('确定将会删除该会话') 
+      if(resove){
+          this.removeSession(roomId, roomIndex);
+        return;
+      }else{
 
+        return;
+      }
+    }
+    const exp = new RegExp('_' + item.c_id,'g');
+    const createRoomId_arr = roomId.split('_');
+    let indexa = (createRoomId_arr).indexOf(String(item.c_id));
+    this.inItValue.currentRoomId = this.inItValue.currentRoomId.replace(exp,'');
+     this.sessionList[roomIndex].roomId = this.inItValue.currentRoomId;
+    this.sessionList[roomIndex].sessionUser.splice(userIndex,1);
+    this.selectSession(this.inItValue.currentRoomId);
+    },
+    removeSession(roomId, roomIndex){// 删除聊天
+      delete this.sessionStatus[this.inItValue.currentRoomId];
+      this.sessionList.splice(roomIndex,1);
+      const selectroom = this.sessionList[roomIndex - 1].roomId;
+      console.log(selectroom)
+      this.selectSession(selectroom);
     },
     adduser(item){ // 添加人员
       this.sessionList[this.inItValue.roomIndex].sessionUser.push(item)
@@ -194,7 +231,9 @@ export default {
       },
       selectSession(roomId) { // 根据roomid选择会话  没有roomid 的话会 新建并选中
       let is_status= {is_have: false, room: ''};
-
+      if (roomId == 0){
+        roomId="_";
+      }
       for (let key in this.sessionStatus){
           if (this.util.equals(key.split('_'), roomId.split('_'))){is_status.is_have = true, is_status.room = key};
           this.sessionStatus[key] = false;
@@ -352,6 +391,7 @@ export default {
 .header_p{
   top:0;left:0;bottom: 0;right:0;
   line-height: 52px;
+  margin: 0 20%;
 }
 .header ul{
   padding: 1px 0;
