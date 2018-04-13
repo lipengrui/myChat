@@ -12,22 +12,26 @@ class HomeController extends Controller {
     // };
     const ctx= this.ctx;
     const token = this.ctx.csrf;
-    console.log(this.ctx.session)
     // if (ctx.cookies.get('user')){
     //   console.log(ctx.cookies.get('user'))
     // }
     // this.ctx.cookies.set('token', token);
     // console.log(ctx.cookies.get('c_user'))
-    if(!!this.ctx.session.data) {
-      // this.ctx.body = { code: 0, message: '登陆成功',  data: this.ctx.session.data }
-      this.ctx.body = { code: 0, message: '登陆成功' }
-      return;
-    }else {
-      this.ctx.body = { code: 1, message: '未登录' }
-    }
+
+    // if(!!this.ctx.session.data) {
+    //   // this.ctx.body = { code: 0, message: '登陆成功',  data: this.ctx.session.data }
+    //   this.ctx.body = { code: 0, message: '登陆成功' }
+    //   return;
+    // }else {
+    //   this.ctx.body = { code: 1, message: '未登录' }
+    // }
+
     // this.ctx.body = {csrf: token, success: true};
     // this.app.mysql.query('INSERT INTO user (name,password) VALUES (1,123123)');
     // await this.ctx.render('home.tpl', datalist);
+    const userList = await this.app.mysql.query('SELECT cid, username from USER');
+    this.ctx.body = { code : 0, data: userList };
+
   }
   async exit() {
     // this.ctx.redirect('/user');
@@ -46,11 +50,11 @@ class HomeController extends Controller {
             // console.log(this.ctxs);
           };
           await this.app.mysql.query('UPDATE user SET logintime = ' + nowTime +' WHERE CID = ' + userData.cid);
-          this.ctx.session.c_id = userData['cid'];
-
+          this.ctx.session.cid = userData['cid'];
+          this.ctx.session.username = userData['username'];
           this.ctx.session.logintime = nowTime;
           this.ctx.session.data = userData;
-          this.ctx.body = {code: 0, message: '登录成功', username: username }
+          this.ctx.body = {code: 0, message: '登录成功', cid: userData['cid'] , username: userData['username'] }
           // if(is_record){
           //   this.ctx.session.maxAge = 10 * 24 * 60 * 60 * 1000
           // }else {
@@ -58,7 +62,6 @@ class HomeController extends Controller {
           //   this.ctx.session.maxAge = 1 * 10 * 1000;
           // }
           this.app.login_name = username;
-          this.ctx.cookies.set('login_name', username);
           return;
         }else {
           this.ctx.body = { code: 103 , message: '用户名或密码错误'}

@@ -51,15 +51,15 @@
     </section>
     <aside class="@slideR friendbox fn_friendbox" :style="friendbox" @mouseleave="hiddenFriendbox">
         <ul>
-          <li v-for="(item, listIndex) in userList" :key="item.c_id" class="clear pointer" @click="addSession(item)">
+          <li v-for="(item, listIndex) in userList" :key="item.cid" class="clear pointer" @click="addSession(item)">
               <img :src="!!item.img?item.img: '../../../static/images/logo.png'" alt="图片加载失败" class="left">
               <span class="left">{{item.name}}</span>
               <el-button type="primary" class="fa_button right" v-if="!inItValue.addgroup" @click="creatRoom(JSON.stringify(item))">发送消息</el-button>
-              <!-- <el-button type="danger" class="fa_button right" v-if="inItValue.addgroup && inItValue.groupName.indexOf(item.c_id) != -1" @click="creatRoom(JSON.stringify(item))">移除</el-button>
-              <el-button type="primary" class="fa_button right" v-if="inItValue.addgroup && inItValue.groupName.indexOf(item.c_id) == -1" @click="adduser(item)">加入</el-button> -->
+              <!-- <el-button type="danger" class="fa_button right" v-if="inItValue.addgroup && inItValue.groupName.indexOf(item.cid) != -1" @click="creatRoom(JSON.stringify(item))">移除</el-button>
+              <el-button type="primary" class="fa_button right" v-if="inItValue.addgroup && inItValue.groupName.indexOf(item.cid) == -1" @click="adduser(item)">加入</el-button> -->
 
-               <el-button type="primary" class="fa_button right" v-if="inItValue.addgroup && !item.selected" @click="addListUser(item.c_id, listIndex)">加入</el-button>
-              <el-button type="danger" class="fa_button right" v-if="inItValue.addgroup && item.selected" @click="removeListUser(item.c_id, listIndex)">移除</el-button>
+               <el-button type="primary" class="fa_button right" v-if="inItValue.addgroup && !item.selected" @click="addListUser(item.cid, listIndex)">加入</el-button>
+              <el-button type="danger" class="fa_button right" v-if="inItValue.addgroup && item.selected" @click="removeListUser(item.cid, listIndex)">移除</el-button>
           </li>
         </ul>
         <div v-if="inItValue.creategroup" class="absolute mB15 na_groupSure">
@@ -88,26 +88,26 @@ export default {
           roomIndex: 0
         },
         userList: [
-          {c_id: 1, name: '李1', img: '', status: true, selected: false},
-          {c_id: 2,name: '李2', img: '', status: true, selected: false},
-          {c_id: 3,name: '李3', img: '', status: true, selected: false},
+          {cid: 1, name: '李1', img: '', status: true, selected: false},
+          {cid: 2,name: '李2', img: '', status: true, selected: false},
+          {cid: 3,name: '李3', img: '', status: true, selected: false},
           
-          {c_id: 1, name: '李1', img: '', status: true, selected: false},
-          {c_id: 2,name: '李2', img: '', status: true, selected: false},
-          {c_id: 3,name: '李3', img: '', status: true, selected: false},{c_id: 1, name: '李1', img: '', status: true, selected: false},
-          {c_id: 2,name: '李2', img: '', status: true, selected: false},
-          {c_id: 3,name: '李3', img: '', status: true, selected: false},{c_id: 1, name: '李1', img: '', status: true, selected: false},
-          {c_id: 2,name: '李2', img: '', status: true, selected: false},
-          {c_id: 3,name: '李3', img: '', status: true, selected: false},{c_id: 1, name: '李1', img: '', status: true, selected: false},
-          {c_id: 2,name: '李2', img: '', status: true, selected: false},
-          {c_id: 3,name: '李3', img: '', status: true, selected: false},{c_id: 1, name: '李1', img: '', status: true, selected: false},
-          {c_id: 2,name: '李2', img: '', status: true, selected: false},
-          {c_id: 3,name: '李3', img: '', status: true, selected: false},
+          {cid: 1, name: '李1', img: '', status: true, selected: false},
+          {cid: 2,name: '李2', img: '', status: true, selected: false},
+          {cid: 3,name: '李3', img: '', status: true, selected: false},{cid: 1, name: '李1', img: '', status: true, selected: false},
+          {cid: 2,name: '李2', img: '', status: true, selected: false},
+          {cid: 3,name: '李3', img: '', status: true, selected: false},{cid: 1, name: '李1', img: '', status: true, selected: false},
+          {cid: 2,name: '李2', img: '', status: true, selected: false},
+          {cid: 3,name: '李3', img: '', status: true, selected: false},{cid: 1, name: '李1', img: '', status: true, selected: false},
+          {cid: 2,name: '李2', img: '', status: true, selected: false},
+          {cid: 3,name: '李3', img: '', status: true, selected: false},{cid: 1, name: '李1', img: '', status: true, selected: false},
+          {cid: 2,name: '李2', img: '', status: true, selected: false},
+          {cid: 3,name: '李3', img: '', status: true, selected: false},
         ],
         userOldList: [
-          {c_id: 1, name: '李1', img: '', status: true, selected: false},
-          {c_id: 2,name: '李2', img: '', status: true, selected: false},
-          {c_id: 3,name: '李3', img: '', status: true, selected: false},
+          {cid: 1, name: '李1', img: '', status: true, selected: false},
+          {cid: 2,name: '李2', img: '', status: true, selected: false},
+          {cid: 3,name: '李3', img: '', status: true, selected: false},
         ],
         sessionStatus: {
           0: true,
@@ -182,11 +182,11 @@ console.log(roomIndex, roomId, userIndex)
       this.sessionStatus[roomId] = true;
       this.sessionStatus = Object.assign({}, this.sessionStatus)
       },
-      addListUser(c_id, index){
+      addListUser(cid, index){
         this.$data.userList[index].selected = true;
         this.$data.userList= Object.assign({}, this.userList);
       },
-      removeListUser(c_id, index){
+      removeListUser(cid, index){
         this.userList[index].selected = false;
       },
       addSession(item){
@@ -206,7 +206,7 @@ console.log(roomIndex, roomId, userIndex)
       },
       creatRoom(item){ // 创建新会话
       const itemData = JSON.parse(item);
-      const roomId = vue.login_msg.c_id + '_' + itemData.c_id;
+      const roomId = vue.login_msg.cid + '_' + itemData.cid;
       if(!this.sessionStatus.hasOwnProperty(roomId) ) { // 之前没有新建
          this.sessionList.push({
            roomId: roomId,

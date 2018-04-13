@@ -153,14 +153,13 @@ export default {
         user: this.dd
       }).then(response => {
         this.loginState = false;
-        console.log(response.data)
         if(response.data.code == 0) {
           this.$message({
             message: '登录成功',
             type: 'success'
           })
-          sessionStorage.setItem('login')
-          // this.$router.push({path:'/main'})
+          sessionStorage.setItem('login_msg', JSON.stringify(response.data));
+          this.$router.push({path:'/main'})
         }else {
           this.$message({
             message: response.data.message,

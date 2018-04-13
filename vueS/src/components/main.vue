@@ -26,6 +26,9 @@
   </el-container>
 </template>
 <script>
+import Vue from 'vue'
+import VueSocketio from 'vue-socket.io';
+
 require('../assets/css/base.css');
     export default {
         name: 'mainCon',
@@ -57,6 +60,15 @@ require('../assets/css/base.css');
         ]
       };
     },
+    sockets:{
+      connect: function(){
+        console.log('连接');
+        // this.sockets.emit('saveStatus', JSON.parse(sessionStorage.getItem('login_msg')).cid)
+      },
+      disconnect: function(){
+        console.log('连接已断开')
+      }
+    },
     methods: {
       handleOpen(key, keyPath) {
         console.log(key, keyPath);
@@ -82,13 +94,9 @@ require('../assets/css/base.css');
       }
     },
     created() {
-    //   this.http.get( this.baseUrl + '/getuser').then(response => {
-    //     if(response.data.code ==0 && !!response.data.data){
-    //       this.userData = response.data.data;
-    //     }else if(response.data.code == 1){
-    //       this.$router.push({path: '/'})
-    //     }
-    // });
+      console.log(123)
+      Vue.use(VueSocketio, 'http://192.168.1.96:7001/user');
+      this.userData.username = JSON.parse(sessionStorage.getItem('login_msg')).username;
 
     }
 }

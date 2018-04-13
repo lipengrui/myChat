@@ -7,17 +7,17 @@
 <script>
 export default {
   name: 'App',
-  sockets:{
-    connect: function(){
-      console.log('socket connecte123d')
-    },
-    loginStatus: function (res) {
-      if (!!res) {
-        sessionStorage.removeItem('login_msg');
-        sessionStorage.setItem('login_msg', JSON.stringify(res));
-      }
-    },
-  },
+  // sockets:{
+  //   connect: function(){
+  //     console.log('socket connecte123d')
+  //   },
+  //   loginStatus: function (res) {
+  //     if (!!res) {
+  //       sessionStorage.removeItem('login_msg');
+  //       sessionStorage.setItem('login_msg', JSON.stringify(res));
+  //     }
+  //   },
+  // },
   methods: {
     clickButton: function(val){
 //        console.log('dainji')
