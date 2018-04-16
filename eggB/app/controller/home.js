@@ -54,6 +54,7 @@ class HomeController extends Controller {
           this.ctx.session.username = userData['username'];
           this.ctx.session.logintime = nowTime;
           this.ctx.session.data = userData;
+          await this.ctx.service.ccap.upDataOnLineUser(userData['cid']);
           this.ctx.body = {code: 0, message: '登录成功', cid: userData['cid'] , username: userData['username'] }
           // if(is_record){
           //   this.ctx.session.maxAge = 10 * 24 * 60 * 60 * 1000

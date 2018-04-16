@@ -60,15 +60,6 @@ require('../assets/css/base.css');
         ]
       };
     },
-    sockets:{
-      connect: function(){
-        console.log('连接');
-        // this.sockets.emit('saveStatus', JSON.parse(sessionStorage.getItem('login_msg')).cid)
-      },
-      disconnect: function(){
-        console.log('连接已断开')
-      }
-    },
     methods: {
       handleOpen(key, keyPath) {
         console.log(key, keyPath);
@@ -94,10 +85,8 @@ require('../assets/css/base.css');
       }
     },
     created() {
-      console.log(123)
-      Vue.use(VueSocketio, 'http://192.168.1.96:7001/user');
       this.userData.username = JSON.parse(sessionStorage.getItem('login_msg')).username;
-
+      this.$socket.emit('bindName',{cid: JSON.parse(sessionStorage.getItem('login_msg')).cid});
     }
 }
 </script>

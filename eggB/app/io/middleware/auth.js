@@ -19,6 +19,7 @@ module.exports = () => {
   return async (ctx, next) => {
     const { app, socket  } = ctx;
     const id = socket.id;
+    // console.log(id)
     const nsp = app.io.of('/user');
     nsp.in('general').clients((error, clients) => {
       // console.log(clients);

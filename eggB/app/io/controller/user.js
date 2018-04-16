@@ -16,7 +16,7 @@ class DefaultController extends Controller {
         const room = '300'
         const rooms = [ room ];
         socket.join(room);
-        console.log(room)
+        console.log(id)
     //     const { ctx, app } = this ;
     //     const roomId = ctx.args[2];
     //     const nsp = this.app.io.of('/user');
@@ -31,6 +31,9 @@ class DefaultController extends Controller {
               message: `User(${id}) joined.`,
             });
         // });
+    }
+    async bindName() {
+        console.log(this.ctx.args[0])
     }
     async saveStatus(){ // 保存用户登录信息
         const { app, ctx } = this;

@@ -18,6 +18,15 @@ export default {
   //     }
   //   },
   // },
+      sockets:{
+      connect: function(){
+        console.log('连接');
+        // this.sockets.emit('saveStatus', JSON.parse(sessionStorage.getItem('login_msg')).cid)
+      },
+      disconnect: function(){
+        console.log('连接已断开')
+      }
+    },
   methods: {
     clickButton: function(val){
 //        console.log('dainji')
