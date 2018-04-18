@@ -17,6 +17,8 @@ module.exports = app => {
   app.io.of('/user').route('message', app.io.controller.user.message);
   app.io.of('/user').route('saveStatus', app.io.controller.user.saveStatus);
   app.io.of('/user').route('bindName', app.io.controller.user.bindName);
+  app.io.of('/user').route('addroom', app.io.controller.user.addroom);
+  app.io.of('/user').route('addroomIng', app.io.controller.user.addroomIng);
     // app.io.of('/chat')
     // app.io.of('/chat').route('chat', app.io.controller.chat.index);
 };

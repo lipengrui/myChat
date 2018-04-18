@@ -18,15 +18,18 @@ async create () {
             return false;
         }
     }
-    async upDataOnLineUser (cid){
-        const { socket, app } = this.ctx;
-        const onlineUser = await app.mysql.query('SELECT cid from user_online WHERE cid=' + cid);
-        console.log(socket.id)
+    async upDataOnLineUser (cid, socket_id) { // 更新用户登录状态
+        const onlineUser = await this.app.mysql.query('SELECT cid from user_online WHERE cid=' + cid);
         if( !!onlineUser[0]) { // 有
-            console.log('有');
+            await this.app.mysql.query('UPDATE `user_online` set socket_id = "' + socket_id + '" WHERE cid = ' + cid );
         } else { // 没有
-            await app.mysql.query('INSERT INTO `user_online` ( cid, socket_id) VALUES ( ' + cid + ',"' + socket.id+'")')
+            await this.app.mysql.query('INSERT INTO `user_online` ( cid, socket_id) VALUES ( ' + cid + ',"' + socket_id+'")')
         }
+    }
+    async selectSocketId (cid) { // 获得该用户的socket_id
+        const socket_id_cid = await this.app.mysql.query('SELECT socket_id FROM user_online WHERE cid= ' + cid);
+        // let socket_id_cid = await this.app.mysql.select('user_online', {where: {cid: cid}});
+        return socket_id_cid[0]
     }
 };
 module.exports = CcapService;

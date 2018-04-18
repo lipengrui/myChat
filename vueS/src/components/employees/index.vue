@@ -26,16 +26,17 @@
       <li v-for="(item, userIndex) in sec.sessionUser" :key="item.name" class="left relative jianParent pointer">
           <img :src="!!item.img?item.img: '../../../static/images/logo.png'" alt="图片加载失败">
           <span>{{item.username}}</span>
-          <i class="jian iconfont icon-53 absolute" @click="removeuser(index, sec.roomId, userIndex, item)"></i>
+          <i class="jian iconfont icon-53 absolute" v-if="sec.isMaster" @click="removeuser(index, sec.roomId, userIndex, item)"></i>
       </li>
       <li class="border_style_dashed na_add hover000 relative left pointer" v-if="sec.roomId != 0" @click="addgroup(sec)"> <i class="iconfont icon-jia"></i> </li>
-        <el-button v-if="sec.roomId != '_'" class="lineH26 right" type="danger" @click="removeSession(sec.roomId, index)">删除聊天</el-button>
+        <el-button v-if="sec.roomId != '_' && sec.isMaster" class="lineH26 right" type="danger" @click="removeSession(sec.roomId, index)">删除聊天</el-button>
+        <el-button v-if="sec.roomId != '_' && !sec.isMaster" class="lineH26 right" type="danger" @click="removeSession(sec.roomId, index)">退出聊天</el-button>
     </ul>
     <!-- <p class="absolute header_p" v-if="sessionUser.length == 1"> 正在输入...</p> -->
     <p class="absolute header_p" v-if="sec.roomId == '_'"> 请选择对话人物</p>
   </div>
   <ul class="ly_flex1 sec_con" :ref="sec.roomId" :rooId="sec.roomId">
-<!-- {{sec|json}} -->
+<!-- {{userList|json}} -->
   </ul>
   <div class="sec_bottom ly_flex">
     <el-input
@@ -52,10 +53,10 @@
         <div class="na_ulParent">
 
         <ul>
-          <li v-for="(item, listIndex) in userList" :key="item.cid" class="clear pointer" @click="addSession(item)">
+          <li v-for="(item, listIndex) in userList" :key="item.cid" class="clear pointer" @click="addSession(item)" v-if="!item.self">
               <img :src="!!item.img?item.img: '../../../static/images/logo.png'" alt="图片加载失败" class="left">
               <span class="left">{{item.username}}</span>
-              <el-button type="primary" class="fa_button right" v-if="!inItValue.addgroup && !inItValue.creategroup" @click="creatRoom(JSON.stringify(item))">发送消息</el-button>
+              <el-button type="primary" class="fa_button right" v-if="!inItValue.addgroup && !inItValue.creategroup" @click="creatRoom(item)">发送消息</el-button>
               <!-- <el-button type="danger" class="fa_button right" v-if="inItValue.addgroup && inItValue.groupName.indexOf(item.cid) != -1" @click="creatRoom(JSON.stringify(item))">移除</el-button>
               <el-button type="primary" class="fa_button right" v-if="inItValue.addgroup && inItValue.groupName.indexOf(item.cid) == -1" @click="adduser(item)">加入</el-button> -->
 
@@ -120,6 +121,10 @@ export default {
           this.userList = response.data.data;
           this.userList.forEach(element => {
             element['selected'] = false;
+            element['self'] = false;
+            if( element.cid == JSON.parse(sessionStorage.getItem('login_msg')).cid ){
+              element['self'] = true;
+            }
           });
           this.userOldList = this.util.deepCopyArrayObj(this.userList);
         }else if(response.data.code == 1){
@@ -129,24 +134,48 @@ export default {
     },
    sockets:{
     message: function (res) {
-      console.log(res)
+      const { message, nowTime, roomId } = res;
       // const nowTime = res[1];
-      // let timer = '';
-
-
-      
-      //   if ( nowTime - this.inItValue.lateTime  >= this.inItValue.awaitTime){
-      //     timer = `<p class="timer">${this.util.formatDate(new Date(nowTime), 'yy-MM-dd hh:mm')}</p>`;
-      //   }
-      //   var creatLi = document.createElement('li');
-      //   creatLi.innerHTML = ` ${timer}
-      // <div class="con clear">
-      // <img class="head left lineH1em" src="../../../static/images/logo.png" alt="">
-      // <p class="left context">${res[0]}</p>
-      // </div>`;
-      // this.$refs[this.inItValue.currentRoomId][0].appendChild(creatLi);
-      // this.inItValue.lateTime = nowTime;
+      let timer = '';
+        if ( nowTime - this.inItValue.lateTime  >= this.inItValue.awaitTime){
+          timer = `<p class="timer">${this.util.formatDate(new Date(nowTime), 'yy-MM-dd hh:mm')}</p>`;
+        }
+        var creatLi = document.createElement('li');
+        creatLi.innerHTML = ` ${timer}
+      <div class="con clear">
+      <img class="head left lineH1em" src="../../../static/images/logo.png" alt="">
+      <p class="left context">${res[0]}</p>
+      </div>`;
+      this.$refs[this.inItValue.currentRoomId][0].appendChild(creatLi);
+      this.inItValue.lateTime = nowTime;
     },
+    addroomIng: function (roomId) {
+      this.$socket.emit('addroomIng', roomId);
+    },
+    addroomed: function (res) { // 已经加入群组的回调
+    const { roomId } = res;
+      console.log('加入了群组');
+      const cidList = roomId.split('_');
+      const currentCid = JSON.parse(sessionStorage.getItem('login_msg')).cid;
+      if(cidList[0] == currentCid)return;
+      let itemData = [];
+      cidList.forEach( element => {
+        if (element != currentCid){
+          itemData.push({cid: element})
+        }
+      });
+      this.util.fullArrayObj(itemData, this.userList, 'cid');
+       itemData.forEach( element => {
+        element.selected = true;
+      });
+
+      this.sessionList.push({
+           roomId: roomId,
+           isMaster: false,
+          sessionUser: itemData
+        });
+        this.selectSession(roomId);
+    }
   },
   computed: {
     comUserList: function () {
@@ -154,6 +183,9 @@ export default {
     }
   },
   methods: {
+    addroom(roomId) { // 加入群组
+      this.$socket.emit('addroom', {roomId: roomId, cid: JSON.parse(sessionStorage.getItem('login_msg')).cid});
+    },
     creategroup(command){// 添加群组
     switch (command) {
       case 'group':
@@ -173,6 +205,7 @@ export default {
         }
           this.sessionList.push({
               roomId: this.inItValue.createRoomId,
+              isMaster: true,
               sessionUser: this.inItValue.createSessionUser
             });
         this.selectSession(this.inItValue.createRoomId);
@@ -181,7 +214,7 @@ export default {
         // this.sessionList[this.inItValue.currentIndex].roomId = ;
         // this.sessionList[this.inItValue.currentIndex].sessionUser = this.inItValue.createSessionUser;
         // console.log(this.sessionList[this.inItValue.currentIndex].sessionUser)
-        this.sessionList.splice(this.inItValue.currentIndex,1,{roomId: this.inItValue.createRoomId, sessionUser: this.inItValue.createSessionUser});
+        this.sessionList.splice(this.inItValue.currentIndex,1,{roomId: this.inItValue.createRoomId, isMaster: true,sessionUser: this.inItValue.createSessionUser});
         delete this.sessionStatus[this.inItValue.currentRoomId];
         this.selectSession(this.inItValue.createRoomId);
         this.hiddenFriendbox();
@@ -204,7 +237,7 @@ export default {
     removeuser(roomIndex, roomId, userIndex, item, ) { // 移除人员
     const len = this.sessionList[roomIndex].sessionUser.length;
     console.log(this.sessionList[roomIndex])
-    if ( len == 2){
+    if ( len <= 2){
       const resove = confirm('确定将会删除该会话') 
       if(resove){
           this.removeSession(roomId, roomIndex);
@@ -308,23 +341,26 @@ export default {
       },
       creatRoom(item){ // 创建新房间
       const login_msg = JSON.parse(sessionStorage.getItem('login_msg'));
-      const itemData = JSON.parse(item);
+      const itemData = item;
+      itemData.selected = true;
       const roomId = JSON.parse(sessionStorage.getItem('login_msg')).cid + '_' + itemData.cid;
       const is_status = this.panhoveroomId(roomId);
       if(!is_status.is_have ) { // 之前没有新建
          this.sessionList.push({
            roomId: roomId,
+           isMaster: true,
           sessionUser: [
             itemData
           ]
         });
       }
         this.selectSession(roomId)
+        this.addroom(roomId);
       },
       send(){
         const nowTime = new Date().getTime();
         const username = JSON.parse(sessionStorage.getItem('login_msg')).cid;
-        this.$socket.emit('message', this.message,nowTime, this.inItValue.currentRoomId);
+        this.$socket.emit('message', {message:this.message,nowTime:nowTime, roomId:this.inItValue.currentRoomId});
         let timer = '';
         if ( nowTime - this.inItValue.lateTime  >= this.inItValue.awaitTime){
           timer = `<p class="timer">${this.util.formatDate(new Date(nowTime), 'yy-MM-dd hh:mm')}</p>`;
