@@ -31,5 +31,9 @@ async create () {
         // let socket_id_cid = await this.app.mysql.select('user_online', {where: {cid: cid}});
         return socket_id_cid[0]
     }
+    async getOnlineUser() {
+        const onlineUser = await this.app.mysql.query('SELECT user.cid, user.username from user , user_online WHERE user_online.cid = user.cid');
+        return onlineUser;
+    }
 };
 module.exports = CcapService;

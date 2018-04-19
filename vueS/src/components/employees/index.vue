@@ -36,7 +36,13 @@
     <p class="absolute header_p" v-if="sec.roomId == '_'"> 请选择对话人物</p>
   </div>
   <ul class="ly_flex1 sec_con" :ref="sec.roomId" :rooId="sec.roomId">
-<!-- {{userList|json}} -->
+    <li v-for="(record) in roomRecord[sec.roomId]" :key="record.nowTime" :class="{isMy: record.isMy}">
+      <p class="timer" v-if="record.nowTime - inItValue.lateTime  >= inItValue.awaitTime">{{util.formatDate(new Date(record.nowTime), 'yy-MM-dd hh:mm')}}</p>
+      <div class="con clear">
+      <img class="head lineH1em" src="../../../static/images/logo.png" :class="{ left: !record.isMy, right: record.isMy}" alt="">
+      <p class="context" :class="{ left: !record.isMy, right: record.isMy}">{{record.message}}</p>
+      </div>
+    </li>
   </ul>
   <div class="sec_bottom ly_flex">
     <el-input
@@ -101,9 +107,10 @@ export default {
           // {cid: 2,name: '李2', img: '', status: true, selected: false},
           // {cid: 3,name: '李3', img: '', status: true, selected: false},
         ],
-        sessionStatus: {
+        sessionStatus: { // 房间状态
           '_': true,
         },
+        roomRecord:{},
         sessionList: [
           {roomId:'_' ,sessionUser:[]},
         ]
@@ -115,42 +122,65 @@ export default {
       }
     },
     created(){
-      this.http.get( this.baseUrl + '/getuser').then(response => {
-        if(response.data.code ==0 && !!response.data.data){
-          console.log(response.data)
-          this.userList = response.data.data;
-          this.userList.forEach(element => {
-            element['selected'] = false;
-            element['self'] = false;
-            if( element.cid == JSON.parse(sessionStorage.getItem('login_msg')).cid ){
-              element['self'] = true;
-            }
-          });
-          this.userOldList = this.util.deepCopyArrayObj(this.userList);
-        }else if(response.data.code == 1){
-          this.$router.push({path: '/'})
-        }
-    });
+    //   this.http.get( this.baseUrl + '/getuser').then(response => {
+    //     if(response.data.code ==0 && !!response.data.data){
+    //       console.log(response.data)
+    //       this.userList = response.data.data;
+    //       this.userList.forEach(element => {
+    //         element['selected'] = false;
+    //         element['self'] = false;
+    //         if( element.cid == JSON.parse(sessionStorage.getItem('login_msg')).cid ){
+    //           element['self'] = true;
+    //         }
+    //       });
+    //       this.userOldList = this.util.deepCopyArrayObj(this.userList);
+    //     }else if(response.data.code == 1){
+    //       this.$router.push({path: '/'})
+    //     }
+    // });
+    this.$socket.emit('getuser');
     },
    sockets:{
+     getuser: function (res) {
+      this.userList = res;
+        this.userList.forEach(element => {
+          element['selected'] = false;
+          element['self'] = false;
+          if( element.cid == JSON.parse(sessionStorage.getItem('login_msg')).cid ){
+            element['self'] = true;
+          }
+        });
+      this.userOldList = this.util.deepCopyArrayObj(this.userList);
+     },
     message: function (res) {
-      const { message, nowTime, roomId } = res;
+      const { message, nowTime, roomId } = res[0];
+      if (!this.roomRecord[roomId]) this.roomRecord[roomId] = [];
+      // console.log(this.roomRecord[roomId])
+      this.roomRecord[roomId].push({message: message, nowTime: nowTime, isMy: false});
+      this.roomRecord = Object.assign({}, this.roomRecord);
+      // this.roomRecord[roomId] = this.util.deepCopyArrayObj(this.roomRecord[roomId]);
       // const nowTime = res[1];
-      let timer = '';
-        if ( nowTime - this.inItValue.lateTime  >= this.inItValue.awaitTime){
-          timer = `<p class="timer">${this.util.formatDate(new Date(nowTime), 'yy-MM-dd hh:mm')}</p>`;
-        }
-        var creatLi = document.createElement('li');
-        creatLi.innerHTML = ` ${timer}
-      <div class="con clear">
-      <img class="head left lineH1em" src="../../../static/images/logo.png" alt="">
-      <p class="left context">${res[0]}</p>
-      </div>`;
-      this.$refs[this.inItValue.currentRoomId][0].appendChild(creatLi);
-      this.inItValue.lateTime = nowTime;
+      // let timer = '';
+      //   if ( nowTime - this.inItValue.lateTime  >= this.inItValue.awaitTime){
+      //     timer = `<p class="timer">${this.util.formatDate(new Date(nowTime), 'yy-MM-dd hh:mm')}</p>`;
+      //   }
+      //   var creatLi = document.createElement('li');
+      //   creatLi.innerHTML = ` ${timer}
+      // <div class="con clear">
+      // <img class="head left lineH1em" src="../../../static/images/logo.png" alt="">
+      // <p class="left context">${message}</p>
+      // </div>`;
+      // this.$refs[this.inItValue.currentRoomId][0].appendChild(creatLi);
+      // this.inItValue.lateTime = nowTime;
+    },
+    removeroomIng: function (roomId) {
+      this.$socket.emit('removeroomIng', roomId);
     },
     addroomIng: function (roomId) {
       this.$socket.emit('addroomIng', roomId);
+    },
+    removeroomed: function (res) {
+      console.log('退出群组'+res.roomId);
     },
     addroomed: function (res) { // 已经加入群组的回调
     const { roomId } = res;
@@ -168,7 +198,12 @@ export default {
        itemData.forEach( element => {
         element.selected = true;
       });
+      if (this.sessionStatus.hasOwnProperty(roomId)) { // 之前已经新建过
 
+      }else { //  
+      
+
+      }
       this.sessionList.push({
            roomId: roomId,
            isMaster: false,
@@ -183,8 +218,8 @@ export default {
     }
   },
   methods: {
-    addroom(roomId) { // 加入群组
-      this.$socket.emit('addroom', {roomId: roomId, cid: JSON.parse(sessionStorage.getItem('login_msg')).cid});
+    editroom(roomId) { // 加入群组
+      this.$socket.emit('editroom', {roomId: roomId,oldRoomId: this.inItValue.currentRoomId, cid: JSON.parse(sessionStorage.getItem('login_msg')).cid});
     },
     creategroup(command){// 添加群组
     switch (command) {
@@ -196,7 +231,6 @@ export default {
     }
     },
     grouped() { 
-      console.log(this.sessionList)
     if (this.inItValue.creategroup){// 确定创建群组
         if(this.inItValue.createSessionUser.length <= 0) return;
         let is_status = this.panhoveroomId(this.inItValue.createRoomId);
@@ -208,6 +242,8 @@ export default {
               isMaster: true,
               sessionUser: this.inItValue.createSessionUser
             });
+        this.roomRecord[this.inItValue.createRoomId] = [];
+        this.editroom(this.inItValue.createRoomId);
         this.selectSession(this.inItValue.createRoomId);
         this.hiddenFriendbox();
     }else if (this.inItValue.addgroup){ // 确定对群组的修改
@@ -216,10 +252,12 @@ export default {
         // console.log(this.sessionList[this.inItValue.currentIndex].sessionUser)
         this.sessionList.splice(this.inItValue.currentIndex,1,{roomId: this.inItValue.createRoomId, isMaster: true,sessionUser: this.inItValue.createSessionUser});
         delete this.sessionStatus[this.inItValue.currentRoomId];
+        this.roomRecord[this.inItValue.createRoomId] = this.util.deepCopyArrayObj(this.roomRecord[this.inItValue.currentRoomId]);
+        delete this.roomRecord[this.inItValue.currentRoomId];
+        this.editroom(this.inItValue.createRoomId);
         this.selectSession(this.inItValue.createRoomId);
         this.hiddenFriendbox();
     }
-    
     },
     addgroup(currentgroup) {  // 加入群组
     if (currentgroup.roomId == '_'){
@@ -308,6 +346,7 @@ export default {
         // this.inItValue.currentRoomId += ('_' + item.cid);
           // return;
         // }
+        console.log(this.inItValue.createRoomId)
       },
       removeListUser(item, index){
         this.userList[index].selected = false;
@@ -361,18 +400,20 @@ export default {
         const nowTime = new Date().getTime();
         const username = JSON.parse(sessionStorage.getItem('login_msg')).cid;
         this.$socket.emit('message', {message:this.message,nowTime:nowTime, roomId:this.inItValue.currentRoomId});
-        let timer = '';
-        if ( nowTime - this.inItValue.lateTime  >= this.inItValue.awaitTime){
-          timer = `<p class="timer">${this.util.formatDate(new Date(nowTime), 'yy-MM-dd hh:mm')}</p>`;
-        }
-        var creatLi = document.createElement('li');
-        creatLi.className = 'isMy';
-        creatLi.innerHTML = ` ${timer}
-      <div class="con clear">
-      <img class="head right lineH1em" src="../../../static/images/logo.png" alt="">
-      <p class="right context">${this.message}</p>
-      </div>`;
-      this.$refs[this.inItValue.currentRoomId][0].appendChild(creatLi);
+        this.roomRecord[this.inItValue.currentRoomId] = this.roomRecord[this.inItValue.currentRoomId] || [];
+        this.roomRecord[this.inItValue.currentRoomId].push({message: this.message, nowTime: nowTime, isMy: true});
+      //   let timer = '';
+      //   if ( nowTime - this.inItValue.lateTime  >= this.inItValue.awaitTime){
+      //     timer = `<p class="timer">${this.util.formatDate(new Date(nowTime), 'yy-MM-dd hh:mm')}</p>`;
+      //   }
+      //   var creatLi = document.createElement('li');
+      //   creatLi.className = 'isMy';
+      //   creatLi.innerHTML = ` ${timer}
+      // <div class="con clear">
+      // <img class="head right lineH1em" src="../../../static/images/logo.png" alt="">
+      // <p class="right context">${this.message}</p>
+      // </div>`;
+      // this.$refs[this.inItValue.currentRoomId][0].appendChild(creatLi);
       this.inItValue.lateTime = nowTime;
       this.message = '';
       },

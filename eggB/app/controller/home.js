@@ -29,7 +29,8 @@ class HomeController extends Controller {
     // this.ctx.body = {csrf: token, success: true};
     // this.app.mysql.query('INSERT INTO user (name,password) VALUES (1,123123)');
     // await this.ctx.render('home.tpl', datalist);
-    const userList = await this.app.mysql.query('SELECT cid, username from USER');
+    const userList = await this.ctx.service.ccap.getOnlineUser();
+    // const userList = await this.app.mysql.query('SELECT cid, username from USER');
     this.ctx.body = { code : 0, data: userList };
 
   }
