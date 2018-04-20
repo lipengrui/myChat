@@ -44,7 +44,8 @@
       </div>
     </li>
   </ul>
-  <div class="sec_bottom ly_flex">
+    </section>
+      <div class="sec_bottom ly_flex" id="messge">
     <el-input
       placeholder="请输入内容"
       v-model="message"
@@ -54,7 +55,6 @@
     </el-input>
 <el-button type="primary" @click="send">发送</el-button>
   </div>
-    </section>
     <aside class="@slideR friendbox fn_friendbox" :style="friendbox" @mouseleave="hiddenFriendbox">
         <div class="na_ulParent">
 
@@ -180,35 +180,53 @@ export default {
       this.$socket.emit('addroomIng', roomId);
     },
     removeroomed: function (res) {
-      console.log('退出群组'+res.roomId);
+      const { roomId, oldRoomId } = res;
+      console.log('退出群组'+res.oldRoomId);
+      // this.editSessionUser(oldRoomId, roomId);
+      // const { index } = this.util.filterArrayObj(this.sessionList, {roomId: roomId});
+      // delete this.roomRecord[roomId];
+      // delete this.sessionStatus[roomId];
+      // delete this.sessionList.splice(index, 1);
     },
     addroomed: function (res) { // 已经加入群组的回调
-    const { roomId } = res;
+    const { roomId, oldRoomId } = res;
       console.log('加入了群组');
       const cidList = roomId.split('_');
       const currentCid = JSON.parse(sessionStorage.getItem('login_msg')).cid;
       if(cidList[0] == currentCid)return;
-      let itemData = [];
-      cidList.forEach( element => {
-        if (element != currentCid){
-          itemData.push({cid: element})
+      if (this.sessionStatus.hasOwnProperty(oldRoomId) && oldRoomId !='_') { // 之前已经新建过
+      console.log(0)
+        const { index, arr }  = this.util.filterArrayObj(this.sessionList, {roomId: oldRoomId})
+        this.editSessionUser(oldRoomId, roomId);
+        this.roomRecord[roomId] = this.util.deepCopyArrayObj(this.roomRecord[oldRoomId]);
+        delete this.roomRecord[oldRoomId];
+        if (this.sessionStatus.oldRoomId){ // 正在当前节点
+          this.sessionStatus[roomId] = true;
+        }else {
+          this.sessionStatus[roomId] = false;
         }
-      });
-      this.util.fullArrayObj(itemData, this.userList, 'cid');
-       itemData.forEach( element => {
-        element.selected = true;
-      });
-      if (this.sessionStatus.hasOwnProperty(roomId)) { // 之前已经新建过
-
-      }else { //  
-      
-
-      }
-      this.sessionList.push({
+        delete this.sessionStatus.oldRoomId;
+        this.sessionList[index].roomId = roomId;
+         this.sessionList = Object.assign({}, this.sessionList);
+      }else { //  第一次新建
+      console.log(1)
+          let itemData = [];
+          cidList.forEach( element => {
+            if (element != currentCid){
+              itemData.push({cid: element})
+            }
+          });
+          this.util.fullArrayObj(itemData, this.userList, 'cid');
+          itemData.forEach( element => {
+            element.selected = true;
+          });
+          this.sessionList.push({
            roomId: roomId,
            isMaster: false,
           sessionUser: itemData
         });
+
+      }
         this.selectSession(roomId);
     }
   },
@@ -218,7 +236,31 @@ export default {
     }
   },
   methods: {
+    // 根据前后 roomId 变化 增减会话中的user
+    editSessionUser(oldRoomId, roomId){
+      const cidList = roomId.split('_');
+      const oldCidList = oldRoomId.split('_');
+      const getroomIdSession = this.util.filterArrayObj(this.sessionList, {roomId: oldRoomId});
+      // for(let i = 0,l =oldRoomId.length; i< l; i++ ){ // 删除掉user
+      //     if (!cidList.includes(oldRoomId[i])){
+      //        this.sessionList[getroomIdSession.index].sessionUser.splice(i,1);
+      //     } 
+      // }
+      const userL = [];
+      for(let i = 0,l =cidList.length; i< l; i++ ){ // 添加user
+          if (cidList[i] != JSON.parse(sessionStorage.getItem('login_msg')).cid) {
+            const { index, arr } = this.util.filterArrayObj(this.userList, {cid: cidList[i]})
+            userL.push(arr[0])
+          }
+      }
+      this.sessionList[getroomIdSession.index].sessionUser = userL;
+     
+    },
+    addroom(roomId){
+      this.$socket.emit('editroom', {roomId: roomId,oldRoomId: '_', cid: JSON.parse(sessionStorage.getItem('login_msg')).cid});
+    },
     editroom(roomId) { // 加入群组
+    console.log(roomId+'////'+ this.inItValue.currentRoomId)
       this.$socket.emit('editroom', {roomId: roomId,oldRoomId: this.inItValue.currentRoomId, cid: JSON.parse(sessionStorage.getItem('login_msg')).cid});
     },
     creategroup(command){// 添加群组
@@ -243,7 +285,7 @@ export default {
               sessionUser: this.inItValue.createSessionUser
             });
         this.roomRecord[this.inItValue.createRoomId] = [];
-        this.editroom(this.inItValue.createRoomId);
+        this.addroom(this.inItValue.createRoomId);
         this.selectSession(this.inItValue.createRoomId);
         this.hiddenFriendbox();
     }else if (this.inItValue.addgroup){ // 确定对群组的修改
@@ -346,7 +388,6 @@ export default {
         // this.inItValue.currentRoomId += ('_' + item.cid);
           // return;
         // }
-        console.log(this.inItValue.createRoomId)
       },
       removeListUser(item, index){
         this.userList[index].selected = false;
@@ -446,6 +487,13 @@ export default {
 }
 </script>
 <style lang="css" scoped>
+#messge{
+  width: 600px;
+  position: absolute;
+  bottom: 0;
+  left:0; right:0;
+    margin: 0 auto;
+}
 .na_sessionList{
   left:-73px;
   top:0;bottom:0;

@@ -27,7 +27,7 @@ async create () {
         }
     }
     async selectSocketId (cid) { // 获得该用户的socket_id
-        const socket_id_cid = await this.app.mysql.query('SELECT socket_id FROM user_online WHERE cid= ' + cid);
+        const socket_id_cid = await this.app.mysql.query('SELECT socket_id FROM user_online WHERE cid= ' + '"'+cid+'"');
         // let socket_id_cid = await this.app.mysql.select('user_online', {where: {cid: cid}});
         return socket_id_cid[0]
     }

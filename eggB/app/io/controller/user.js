@@ -22,6 +22,7 @@ class DefaultController extends Controller {
             // 更新在线用户列表
             socket.broadcast.to(roomId).emit('message', this.ctx.args);
         // });
+        console.log(nsp.adapter.rooms)
     }
     async bindName() { // 更新用户登录信息
         const { socket } = this.ctx;
@@ -43,36 +44,37 @@ class DefaultController extends Controller {
         const { roomId, oldRoomId } = this.ctx.args[0];
         const cidList = roomId.split('_');
         const oldCidList = oldRoomId.split('_');
+        const nsp = this.app.io.of('/user');
         const removeList = [];
         const addList = [];
-        for(let i = 0,l =oldRoomId.length; i< l; i++ ){ // 提出room
-            if (!cidList.includes(oldRoomId[i])){
-                removeList.push(oldRoomId[i]);
-                const socketResult = await this.service.ccap.selectSocketId(oldRoomId[i]);
-                if (!!socketResult) nsp.to(socketResult.socket_id).emit('removeroomIng',{roomId: roomId});
-            } 
+        if (oldRoomId != '_') {
+            for(let i = 0,l =oldCidList.length; i< l; i++ ){ // 提出room
+                const socketResult = await this.service.ccap.selectSocketId(oldCidList[i]);
+                if (!!socketResult) nsp.to(socketResult.socket_id).emit('removeroomIng',{roomId: roomId, oldRoomId: oldRoomId});
+            }
         }
         for(let i = 0,l =cidList.length; i< l; i++ ){ // 加入room
-            if (!oldCidList.includes(cidList[i])) {
+            // if (!oldCidList.includes(cidList[i])) {
                 addList.push(cidList[i]);
                 const socketResult = await this.service.ccap.selectSocketId(cidList[i]);
-                if (!!socketResult) nsp.to(socketResult.socket_id).emit('addroomIng',{roomId: roomId});
-            }
+                if (!!socketResult) nsp.to(socketResult.socket_id).emit('addroomIng',{roomId: roomId, oldRoomId: oldRoomId});
+            // }
         }
     }
     async removeroomIng() {
-        const { roomId } = this.ctx.args[0];
+        console.log('remove111')
+        const { roomId, oldRoomId } = this.ctx.args[0];
         // console.log(roomId)
-        this.ctx.socket.leave(roomId);
+        this.ctx.socket.leave(oldRoomId);
         const nsp = this.app.io.of('/user');
-        nsp.to(this.ctx.socket.id).emit('removeroomed',{code:0, message: 'ok', roomId: roomId});
+        nsp.to(this.ctx.socket.id).emit('removeroomed', { code: 0, message: 'ok', roomId: roomId, oldRoomId: oldRoomId });
     }
     async addroomIng() { // 将用户添加入某一组
-        const { roomId } = this.ctx.args[0];
+        const { roomId, oldRoomId } = this.ctx.args[0];
         // console.log(roomId)
         this.ctx.socket.join(roomId);
         const nsp = this.app.io.of('/user');
-        nsp.to(this.ctx.socket.id).emit('addroomed',{code:0, message: 'ok', roomId: roomId});
+        nsp.to(this.ctx.socket.id).emit('addroomed',{code:0, message: 'ok', roomId: roomId, oldRoomId: oldRoomId});
         // console.log(nsp.adapter.rooms)
     }
     async saveStatus(){ // 保存用户登录信息
