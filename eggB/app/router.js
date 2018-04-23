@@ -21,6 +21,7 @@ module.exports = app => {
   app.io.of('/user').route('addroomIng', app.io.controller.user.addroomIng);
   app.io.of('/user').route('removeroomIng', app.io.controller.user.removeroomIng);
   app.io.of('/user').route('getuser', app.io.controller.user.getuser);
+  app.io.of('/user').route('deleteRoom', app.io.controller.user.deleteRoom);
     // app.io.of('/chat')
     // app.io.of('/chat').route('chat', app.io.controller.chat.index);
 };

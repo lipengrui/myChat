@@ -111,6 +111,44 @@ export const util = {
       }
     }
   },
+  removeArrayObj: function (arry1, obj){
+    let arr = [];
+    for (let i = 0, l = arry1.length; i < l;  i++){
+      let isPass = false;
+        for(let key in obj) {
+          if (obj[i][key] == arry1[i][key] ){
+            arry1[i] = arry2[j];
+            isPass = true;
+          }else {
+            isPass = false;
+            break;
+          }
+        }
+      if (!isPass){
+        arr.push(arry1[i])
+      }
+    }
+    return arr;
+  },
+  addArrayObj: function (arry1, obj){
+    let arr = [];
+    for (let i = 0, l = arry1.length; i < l;  i++){
+      let isPass = false;
+        for(let key in obj) {
+          if (obj[i][key] == arry1[i][key] ){
+            arry1[i] = arry2[j];
+            isPass = true;
+          }else {
+            isPass = false;
+            break;
+          }
+        }
+      if (isPass){
+        arr.push(arry1[i])
+      }
+    }
+    return arr;
+  },
   //筛选出 具备某一特定值  里的数组对象里的某一个对象
   filterArrayObj: function (target ,obj) {
     let finisharr = [];
@@ -129,19 +167,6 @@ export const util = {
         index.push(i);
       }
     }
-    // target.forEach( ele => {
-    //   let is_true = false; // 是否满足obj里的条件
-      // for (let key in obj){
-      //   if(ele[key] == obj[key]){
-      //     is_true = true;
-      //   }else {
-      //     is_true = false;
-      //   }
-      // }
-      // if (is_true){
-      //   finisharr.push(ele);
-      // }
-    // });
     return {index: index, arr: finisharr};
   },
 };

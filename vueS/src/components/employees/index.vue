@@ -29,8 +29,8 @@
           <i class="jian iconfont icon-53 absolute" v-if="sec.isMaster" @click="removeuser(index, sec.roomId, userIndex, item)"></i>
       </li>
       <li class="border_style_dashed na_add hover000 relative left pointer" v-if="sec.roomId != 0" @click="addgroup(sec)"> <i class="iconfont icon-jia"></i> </li>
-        <el-button v-if="sec.roomId != '_' && sec.isMaster" class="lineH26 right" type="danger" @click="removeSession(sec.roomId, index)">删除聊天</el-button>
-        <el-button v-if="sec.roomId != '_' && !sec.isMaster" class="lineH26 right" type="danger" @click="removeSession(sec.roomId, index)">退出聊天</el-button>
+        <el-button v-if="sec.roomId != '_' && sec.isMaster" class="lineH26 right" type="danger" @click="removeSession(sec.roomId, index ,sec.isMaster)">删除聊天</el-button>
+        <el-button v-if="sec.roomId != '_' && !sec.isMaster" class="lineH26 right" type="danger" @click="editSession(sec.roomId, index, sec.isMaster)">退出聊天</el-button>
     </ul>
     <!-- <p class="absolute header_p" v-if="sessionUser.length == 1"> 正在输入...</p> -->
     <p class="absolute header_p" v-if="sec.roomId == '_'"> 请选择对话人物</p>
@@ -174,43 +174,62 @@ export default {
       // this.inItValue.lateTime = nowTime;
     },
     removeroomIng: function (roomId) {
+            console.log(222)
       this.$socket.emit('removeroomIng', roomId);
     },
     addroomIng: function (roomId) {
+      console.log(111)
       this.$socket.emit('addroomIng', roomId);
     },
     removeroomed: function (res) {
-      const { roomId, oldRoomId } = res;
-      console.log('退出群组'+res.oldRoomId);
-      // this.editSessionUser(oldRoomId, roomId);
-      // const { index } = this.util.filterArrayObj(this.sessionList, {roomId: roomId});
-      // delete this.roomRecord[roomId];
-      // delete this.sessionStatus[roomId];
-      // delete this.sessionList.splice(index, 1);
+      const { roomId, oldRoomId ,type ,cid} = res;
+      console.log('退出群组'+oldRoomId);
+      // if ( type == 'all'){ // 删除房间
+      //   const { index } = this.util.filterArrayObj(this.sessionList, {roomId: oldRoomId});
+      //   this.sessionList.splice(index, 1);
+      //   this.selectSession( this.sessionList[index -1 ].roomId );
+      //   delete this.sessionStatus[oldRoomId];
+      //   delete this.roomRecord[oldRoomId];
+      // }
     },
     addroomed: function (res) { // 已经加入群组的回调
     const { roomId, oldRoomId } = res;
       console.log('加入了群组');
+      if(!this.roomRecord[oldRoomId]) { this.roomRecord[oldRoomId] = []; }
       const cidList = roomId.split('_');
       const currentCid = JSON.parse(sessionStorage.getItem('login_msg')).cid;
-      if(cidList[0] == currentCid)return;
       if (this.sessionStatus.hasOwnProperty(oldRoomId) && oldRoomId !='_') { // 之前已经新建过
-      console.log(0)
+        let itemData = [];
         const { index, arr }  = this.util.filterArrayObj(this.sessionList, {roomId: oldRoomId})
         this.editSessionUser(oldRoomId, roomId);
         this.roomRecord[roomId] = this.util.deepCopyArrayObj(this.roomRecord[oldRoomId]);
-        delete this.roomRecord[oldRoomId];
         if (this.sessionStatus.oldRoomId){ // 正在当前节点
+          this.sessionStatus[oldRoomId] = false;
           this.sessionStatus[roomId] = true;
         }else {
           this.sessionStatus[roomId] = false;
         }
+        delete this.roomRecord[oldRoomId];
         delete this.sessionStatus.oldRoomId;
         this.sessionList[index].roomId = roomId;
+        let userCid = {};
+        cidList.forEach( element => {
+            if (element != currentCid){
+              for ( let arr of this.userList ) {
+                if ( arr['cid'] == element ) {
+                    itemData.push(arr)
+                }
+              }
+            }
+          });
+          console.log(itemData)
+        this.sessionList[index].sessionUser = itemData;
+        // this.sessionList = this.deepCopyArrayObj(this.sessionList);
          this.sessionList = Object.assign({}, this.sessionList);
       }else { //  第一次新建
       console.log(1)
-          let itemData = [];
+          let itemData = [], isMaster = false;
+          if(cidList[0] == currentCid){isMaster = true;};
           cidList.forEach( element => {
             if (element != currentCid){
               itemData.push({cid: element})
@@ -222,7 +241,7 @@ export default {
           });
           this.sessionList.push({
            roomId: roomId,
-           isMaster: false,
+           isMaster: isMaster,
           sessionUser: itemData
         });
 
@@ -279,23 +298,20 @@ export default {
         if(is_status.is_have){
           this.selectSession(is_status.room);return;
         }
-          this.sessionList.push({
-              roomId: this.inItValue.createRoomId,
-              isMaster: true,
-              sessionUser: this.inItValue.createSessionUser
-            });
+          // this.sessionList.push({
+          //     roomId: this.inItValue.createRoomId,
+          //     isMaster: true,
+          //     sessionUser: this.inItValue.createSessionUser
+          //   });
         this.roomRecord[this.inItValue.createRoomId] = [];
         this.addroom(this.inItValue.createRoomId);
         this.selectSession(this.inItValue.createRoomId);
         this.hiddenFriendbox();
     }else if (this.inItValue.addgroup){ // 确定对群组的修改
-        // this.sessionList[this.inItValue.currentIndex].roomId = ;
-        // this.sessionList[this.inItValue.currentIndex].sessionUser = this.inItValue.createSessionUser;
-        // console.log(this.sessionList[this.inItValue.currentIndex].sessionUser)
-        this.sessionList.splice(this.inItValue.currentIndex,1,{roomId: this.inItValue.createRoomId, isMaster: true,sessionUser: this.inItValue.createSessionUser});
-        delete this.sessionStatus[this.inItValue.currentRoomId];
-        this.roomRecord[this.inItValue.createRoomId] = this.util.deepCopyArrayObj(this.roomRecord[this.inItValue.currentRoomId]);
-        delete this.roomRecord[this.inItValue.currentRoomId];
+        // this.sessionList.splice(this.inItValue.currentIndex,1,{roomId: this.inItValue.createRoomId, isMaster: true,sessionUser: this.inItValue.createSessionUser});
+        // delete this.sessionStatus[this.inItValue.currentRoomId];
+        // this.roomRecord[this.inItValue.createRoomId] = this.util.deepCopyArrayObj(this.roomRecord[this.inItValue.currentRoomId]);
+        // delete this.roomRecord[this.inItValue.currentRoomId];
         this.editroom(this.inItValue.createRoomId);
         this.selectSession(this.inItValue.createRoomId);
         this.hiddenFriendbox();
@@ -307,6 +323,7 @@ export default {
       return;
     }
       this.util.fullArrayObj(this.userList, currentgroup.sessionUser, 'cid'); // 将当前会话的用户列表 付给所有用户的状态
+      console.log(this.inItValue.currentRoomId)
       this.inItValue.currentIndex = this.util.filterArrayObj(this.sessionList, {roomId: this.inItValue.currentRoomId}).index;
       this.inItValue.createSessionUser = this.util.deepCopyArrayObj(this.sessionList[this.inItValue.currentIndex].sessionUser) ;
 
@@ -320,14 +337,13 @@ export default {
     if ( len <= 2){
       const resove = confirm('确定将会删除该会话') 
       if(resove){
-          this.removeSession(roomId, roomIndex);
+          this.removeSession(roomId, roomIndex , true);
         return;
       }else{
 
         return;
       }
     }
-    const exp = new RegExp('_' + item.cid,'g');
     const createRoomId_arr = roomId.split('_');
     let indexa = (createRoomId_arr).indexOf(String(item.cid));
     this.inItValue.currentRoomId = this.inItValue.currentRoomId.replace(exp,'');
@@ -335,12 +351,26 @@ export default {
     this.sessionList[roomIndex].sessionUser.splice(userIndex,1);
     this.selectSession(this.inItValue.currentRoomId);
     },
-    removeSession(roomId, roomIndex){// 删除聊天
-      delete this.sessionStatus[this.inItValue.currentRoomId];
-      this.sessionList.splice(roomIndex,1);
-      const selectroom = this.sessionList[roomIndex - 1].roomId;
-      console.log(selectroom)
-      this.selectSession(selectroom);
+    removeSession(roomId, roomIndex, isMaster){// 删除聊天
+      // delete this.sessionStatus[this.inItValue.currentRoomId];
+      // this.sessionList.splice(roomIndex,1);
+      console.log(this.sessionList);
+      // const selectroom = this.sessionList[roomIndex - 1].roomId;
+      this.$socket.emit('deleteRoom', {roomId: this.inItValue.currentRoomId, isMaster: isMaster, cid: JSON.parse(sessionStorage.getItem('login_msg')).cid})
+      // this.selectSession(selectroom);
+    },
+    editSession(roomId, roomIndex, isMaster) { // 退出聊天
+        const cid = JSON.parse(sessionStorage.getItem('login_msg')).cid;
+        const exp = new RegExp('_' + cid,'g');
+        const createRoomId = this.inItValue.currentRoomId.replace(exp,'');
+        this.editroom(createRoomId);
+
+        // this.sessionStatus[createRoomId] = true;
+        // delete this.sessionStatus[roomId];
+        // this.roomRecord[createRoomId] = this.util.deepCopyArrayObj(this.roomRecord[createRoomId]);
+        // delete this.roomRecord[createRoomId];
+        // this.sessionList[roomIndex].sessionUser = this.util.removeArrayObj(this.sessionList[roomIndex].sessionUser, {cid: cid});
+        // this.sessionList = this.deepCopyArrayObj(this.sessionList);
     },
     adduser(item){ // 添加人员
       this.sessionList[this.inItValue.roomIndex].sessionUser.push(item)

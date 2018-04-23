@@ -50,7 +50,7 @@ class DefaultController extends Controller {
         if (oldRoomId != '_') {
             for(let i = 0,l =oldCidList.length; i< l; i++ ){ // 提出room
                 const socketResult = await this.service.ccap.selectSocketId(oldCidList[i]);
-                if (!!socketResult) nsp.to(socketResult.socket_id).emit('removeroomIng',{roomId: roomId, oldRoomId: oldRoomId});
+                if (!!socketResult) nsp.to(socketResult.socket_id).emit('removeroomIng',{roomId: roomId, oldRoomId: oldRoomId, type: 'all'});
             }
         }
         for(let i = 0,l =cidList.length; i< l; i++ ){ // 加入room
@@ -61,13 +61,29 @@ class DefaultController extends Controller {
             // }
         }
     }
+    async deleteRoom() {
+        const { roomId, isMaster, cid } = this.ctx.args[0];
+        const nsp = this.app.io.of('/user');
+        const cidList = roomId.split('_');
+        if (roomId != '_' && !!isMaster) { // 删除房间
+            for(let i = 0,l =cidList.length; i< l; i++ ){ // 提出room
+                const socketResult = await this.service.ccap.selectSocketId(cidList[i]);
+                if (!!socketResult) nsp.to(socketResult.socket_id).emit('removeroomIng',{roomId: roomId, oldRoomId: roomId, isMaster: isMaster, cid: cid, type: 'all'});
+            }
+        }else if (!isMaster){ // 退出房间
+            const socketResult = await this.service.ccap.selectSocketId(cid);
+            if (!!socketResult) nsp.to(socketResult.socket_id).emit('removeroomIng',{roomId: roomId, oldRoomId: roomId, isMaster: isMaster, cid: cid, type: 'one'});
+        }
+    }
     async removeroomIng() {
-        console.log('remove111')
-        const { roomId, oldRoomId } = this.ctx.args[0];
+        const { roomId, oldRoomId, isMaster, type } = this.ctx.args[0];
+        const arg = this.ctx.args[0];
         // console.log(roomId)
         this.ctx.socket.leave(oldRoomId);
         const nsp = this.app.io.of('/user');
-        nsp.to(this.ctx.socket.id).emit('removeroomed', { code: 0, message: 'ok', roomId: roomId, oldRoomId: oldRoomId });
+        if (type == 'all') {
+            nsp.to(this.ctx.socket.id).emit('removeroomed', { code: 0, message: 'ok', ...arg});
+        }
     }
     async addroomIng() { // 将用户添加入某一组
         const { roomId, oldRoomId } = this.ctx.args[0];
