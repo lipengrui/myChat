@@ -35,5 +35,9 @@ async create () {
         const onlineUser = await this.app.mysql.query('SELECT user.cid, user.username from user , user_online WHERE user_online.cid = user.cid');
         return onlineUser;
     }
+    async outLine(cid) {
+        const result = await this.app.mysql.query('DELETE FROM user_online WHERE cid= "'+ cid +'"');
+        return true
+    }
 };
 module.exports = CcapService;

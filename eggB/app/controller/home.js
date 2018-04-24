@@ -35,10 +35,17 @@ class HomeController extends Controller {
 
   }
   async exit() {
-    // this.ctx.redirect('/user');
-    this.ctx.socket.emit('loginStatus', '123231');
-       this.ctx.session = null;
-    this.ctx.body = { code : 0, message: '成功退出'}
+    const cid = this.ctx.params.cid;
+    if (!cid){
+      this.ctx.body = { code : 1, message: 'cid 未传'}
+      return;
+    }else {
+    const is_drop =  await this.ctx.service.ccap.outLine(cid);
+    if (is_drop){
+      this.ctx.body = { code : 0, message: '成功退出'}
+      this.ctx.session = null;
+    }
+    }
   }
   async login() {
     const { username, password, is_record } = this.ctx.request.body;

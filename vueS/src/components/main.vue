@@ -60,6 +60,16 @@ require('../assets/css/base.css');
         ]
       };
     },
+    sockets: {
+      loginCover: function (res) {
+        this.$message({
+          message: '该账号已在其他客户端登陆，此次登陆被迫下线',
+          type: 'error'
+        });
+        this.$router.push({'path':'/'});
+        sessionStorage.removeItem('login_msg');
+      }
+    },
     methods: {
       handleOpen(key, keyPath) {
         console.log(key, keyPath);
@@ -68,7 +78,7 @@ require('../assets/css/base.css');
         console.log(key, keyPath);
       },
       exit(){
-        this.http.get( this.baseUrl + '/exit').then(response => {
+        this.http.get( this.baseUrl + '/exit/' + JSON.parse(sessionStorage.getItem('login_msg')).cid).then(response => {
           if(response.data.code == 0){
             this.$message({
               message: '已退出登录',
@@ -85,6 +95,10 @@ require('../assets/css/base.css');
       }
     },
     created() {
+      if (JSON.parse(sessionStorage.getItem('login_msg')) == null) {
+        this.$router.push({'path': '/'});
+        return;
+      }
       this.userData.username = JSON.parse(sessionStorage.getItem('login_msg')).username;
       this.$socket.emit('bindName',{cid: JSON.parse(sessionStorage.getItem('login_msg')).cid});
     }

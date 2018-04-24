@@ -1,3 +1,5 @@
+
+
 'use strict'
 const Controller = require('egg').Controller;
 
@@ -26,8 +28,15 @@ class DefaultController extends Controller {
     }
     async bindName() { // 更新用户登录信息
         const { socket } = this.ctx;
-        // console.log(this.ctx.args[0])
-        this.ctx.service.ccap.upDataOnLineUser(this.ctx.args[0].cid, socket.id);
+        const oldSocketId = await this.service.ccap.selectSocketId(this.ctx.args[0].cid);
+        console.log(oldSocketId);
+        if (oldSocketId == undefined) {
+            this.ctx.service.ccap.upDataOnLineUser(this.ctx.args[0].cid, socket.id);
+        }
+        if (!!oldSocketId) {
+           socket.to(oldSocketId.socket_id).emit('loginCover');
+           this.ctx.service.ccap.upDataOnLineUser(this.ctx.args[0].cid, socket.id);
+        }
     }
     // async addroom() { // 将用户预备分配进某一组
     //     const roomId = this.ctx.args[0].roomId;
@@ -50,7 +59,11 @@ class DefaultController extends Controller {
         if (oldRoomId != '_') {
             for(let i = 0,l =oldCidList.length; i< l; i++ ){ // 提出room
                 const socketResult = await this.service.ccap.selectSocketId(oldCidList[i]);
-                if (!!socketResult) nsp.to(socketResult.socket_id).emit('removeroomIng',{roomId: roomId, oldRoomId: oldRoomId, type: 'all'});
+                if (!cidList.includes(oldCidList[i])) {
+                    if (!!socketResult) nsp.to(socketResult.socket_id).emit('removeroomIng',{roomId: roomId, oldRoomId: oldRoomId, cid:oldCidList[i],  type: 'edit'});
+                 }else {
+                    if (!!socketResult) nsp.to(socketResult.socket_id).emit('removeroomIng',{roomId: roomId, oldRoomId: oldRoomId, cid:oldCidList[i],  type: 'delete'});
+                 }
             }
         }
         for(let i = 0,l =cidList.length; i< l; i++ ){ // 加入room
@@ -68,7 +81,7 @@ class DefaultController extends Controller {
         if (roomId != '_' && !!isMaster) { // 删除房间
             for(let i = 0,l =cidList.length; i< l; i++ ){ // 提出room
                 const socketResult = await this.service.ccap.selectSocketId(cidList[i]);
-                if (!!socketResult) nsp.to(socketResult.socket_id).emit('removeroomIng',{roomId: roomId, oldRoomId: roomId, isMaster: isMaster, cid: cid, type: 'all'});
+                if (!!socketResult) nsp.to(socketResult.socket_id).emit('removeroomIng',{roomId: roomId, oldRoomId: roomId, isMaster: isMaster, cid: cidList[i], type: 'all'});
             }
         }else if (!isMaster){ // 退出房间
             const socketResult = await this.service.ccap.selectSocketId(cid);
@@ -81,8 +94,10 @@ class DefaultController extends Controller {
         // console.log(roomId)
         this.ctx.socket.leave(oldRoomId);
         const nsp = this.app.io.of('/user');
-        if (type == 'all') {
+        if (type == 'all' || type == 'edit') {
             nsp.to(this.ctx.socket.id).emit('removeroomed', { code: 0, message: 'ok', ...arg});
+        } else if ( type == 'delete' ) {
+            return;
         }
     }
     async addroomIng() { // 将用户添加入某一组

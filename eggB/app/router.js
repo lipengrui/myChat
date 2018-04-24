@@ -12,7 +12,7 @@ module.exports = app => {
   router.post('/login', controller.home.login);
   router.get('/register', controller.home.getCapicha);
   router.post('/register', saveSession, controller.home.register);
-  router.get('/exit', verifyUser, controller.home.exit);
+  router.get('/exit/:cid', verifyUser, controller.home.exit);
   app.io.of('/user').route('user', app.io.controller.user.index);
   app.io.of('/user').route('message', app.io.controller.user.message);
   app.io.of('/user').route('saveStatus', app.io.controller.user.saveStatus);
