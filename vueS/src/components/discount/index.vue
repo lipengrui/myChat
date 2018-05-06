@@ -1,6 +1,6 @@
 <template>
   <div>
-      优惠吗管理
+      其他管理
   </div>
 </template>
 <script>

@@ -3,7 +3,7 @@
       <div class="tip_nav">
         <div class="title">
           <el-breadcrumb separator="/" class="tip-breadcrumb ">
-                <el-breadcrumb-item>结算中心</el-breadcrumb-item>
+                <el-breadcrumb-item>练习中心</el-breadcrumb-item>
           </el-breadcrumb>
         </div>
       </div>

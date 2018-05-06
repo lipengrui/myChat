@@ -50,11 +50,11 @@ require('../assets/css/base.css');
         },
         {
           path: '/discount',
-          name: '优惠码管理',
+          name: '其他管理',
           icon: 'el-icon-star-on'
         },{
           path: '/calculate',
-          name: '结算中心',
+          name: '练习',
           icon: 'el-icon-star-on'
         }
         ]
